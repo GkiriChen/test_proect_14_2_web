@@ -38,6 +38,8 @@ class DatabaseSessionManager:
             await session.close()
 
 
+
+
 sessionmanager = DatabaseSessionManager(settings.sqlalchemy_database_url)
 
 
