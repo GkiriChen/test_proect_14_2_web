@@ -14,10 +14,13 @@ Base = declarative_base()
 ## ----Create ----#
 
 class UserRole(Base):
-    __tablename__ = "userroles"
-    id = Column(Integer, primary_key=True)
-    role_name = Column(String(50))
+    __tablename__ = "user_roles"
+    id = Column(Integer, primary_key=True, index=True)
+    role_name = Column(String, unique=True, index=True)
 
+    users = relationship("User", back_populates="role")
+
+    __allow_unmapped__ = True
 
 class User(Base):
     __tablename__ = "users"

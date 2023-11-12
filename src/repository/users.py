@@ -90,3 +90,36 @@ async def update_avatar(email, url: str, db: Session) -> User:
     user.avatar = url
     db.commit()
     return user
+
+from typing import Optional
+from src.schemas import UpdateUserProfileModel
+
+async def update_user_profile(email: str, profile_data: UpdateUserProfileModel, db: Session) -> User:
+    """
+    Updates the profile information for a user in the database.
+
+    :param email: The email address of the user to update.
+    :type email: str
+    :param profile_data: The updated profile information.
+    :type profile_data: UpdateUserProfileModel
+    :param db: The database session.
+    :type db: Session
+    :return: The user with the updated profile information.
+    :rtype: User
+    """
+    user = await get_user_by_email(email, db)
+    
+    if profile_data.avatar:
+        user.avatar = profile_data.avatar
+    
+    if profile_data.username:
+        user.username = profile_data.username
+    
+    if profile_data.email:
+        user.email = profile_data.email
+    
+    db.commit()
+    db.refresh(user)
+    
+    return user
+

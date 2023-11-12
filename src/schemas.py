@@ -1,13 +1,20 @@
+
+from typing import Optional
+
 from pydantic import BaseModel, EmailStr
 from src.database.models import UserRole
 
 
-
-
+class RequestRoleConfig:
+    arbitrary_types_allowed = True
 
 class RequestRole(BaseModel):
     email: EmailStr
     role: UserRole
+    
+    class Config(RequestRoleConfig):
+        pass
+
 
 
 class CommentSchema(BaseModel):
@@ -34,7 +41,6 @@ class CommentResponse(BaseModel):
 
 class CommentRemoveSchema(BaseModel):
     id: int
-=======
 from datetime import date, datetime
 from pydantic import BaseModel, EmailStr, Field
 
@@ -118,4 +124,19 @@ class RequestEmail(BaseModel):
     :type email: EmailStr
     """
     email: EmailStr
+
+class UpdateUserProfileModel(BaseModel):
+    """
+    Model for updating a user's profile.
+
+    :param avatar: The new avatar URL for the user.
+    :type avatar: Optional[str]
+    :param username: The new username for the user.
+    :type username: Optional[str]
+    :param email: The new email address for the user.
+    :type email: Optional[EmailStr]
+    """
+    avatar: Optional[str]
+    username: Optional[str]
+    email: Optional[EmailStr]
 
