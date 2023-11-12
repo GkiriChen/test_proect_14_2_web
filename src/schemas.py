@@ -1,5 +1,3 @@
-
-
 from pydantic import BaseModel, EmailStr
 from src.database.models import UserRole
 
