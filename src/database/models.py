@@ -13,19 +13,25 @@ Base = declarative_base()
 
 ## ----Create ----#
 
-
-class UserRole(int, enum.Enum):
-    Admin = 1
-    Moderator = 2
-    User = 3
+class UserRole(Base):
+    __tablename__ = "userroles"
+    id = Column(Integer, primary_key=True)
+    role_name = Column(String(50))
 
 
 class User(Base):
     __tablename__ = "users"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    role: Mapped[Enum] = mapped_column("role", Enum(UserRole), default=UserRole.User)
-    photos: Mapped[list["Photo"]] = relationship("Photo", back_populates="user")
+    id = Column(Integer, primary_key=True)
+    role_id = Column('role_id', ForeignKey(
+        'userroles.id', ondelete='CASCADE'), default=3)
+    username = Column(String(50))
+    email = Column(String(250), nullable=False, unique=True)
+    password = Column(String(255), nullable=False)
+    created_at = Column('crated_at', DateTime, default=func.now())
+    avatar = Column(String(255), nullable=True)
+    refresh_token = Column(String(255), nullable=True)
+    confirmed = Column(Boolean, default=False)
+    ban = Column(Boolean, default=False)
 
 
 class Photo(Base):
