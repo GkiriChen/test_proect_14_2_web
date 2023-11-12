@@ -2,7 +2,7 @@ import src.repository.comments as repository_comments
 from src.database.db import get_db
 from fastapi import APIRouter, Depends, status, HTTPException, Form
 from fastapi_limiter.depends import Ratelimiter
-from src.services.auth import get_authenticated_user
+from src.services.auth import Auth
 from src.database.models import User, UserRole
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/comments", tags=['Comments'])
 async def post_comment(
         photo_id: int = Form(...),
         text: str = Form(...),
-        current_user: User = Depends(auth_service.get_authenticated_user),
+        current_user: User = Depends(Auth.get_current_user),
         db: AsyncSession = Depends(get_db),
 ):
     comment = await repository_comments.create_comments(text, current_user, photo_id, db)
@@ -36,7 +36,7 @@ async def post_comment(
 async def change_comment(
         comment_id: int = Form(...),
         text: str = Form(...),
-        current_user: User = Depends(auth_service.get_authenticated_user),
+        current_user: User = Depends(Auth.get_current_user),
         db: AsyncSession = Depends(get_db),
 ):
     comment_check = await repository_comments.get_comment(comment_id, db)
@@ -51,7 +51,7 @@ async def change_comment(
 @router.delete("/delete")
 async def remove_comment(
         comment_id: int = Form(...),
-        current_user: User = Depends(auth_service.get_authenticated_user),
+        current_user: User = Depends(Auth.get_current_user),
         db: AsyncSession = Depends(get_db),
 ):
     comment = await repository_comments.get_comment(comment_id, db)
@@ -71,7 +71,7 @@ async def show_photo_comments(
         photo_id: int,
         limit: int = 0,
         offset: int = 10,
-        current_user: User = Depends(auth_service.get_authenticated_user),
+        current_user: User = Depends(Auth.get_current_user),
         db: AsyncSession = Depends(get_db),
 ):
     comments = await repository_comments.get_photo_comments(limit, offset, photo_id, db)
@@ -83,7 +83,7 @@ async def show_user_comments(
         user_id: int,
         limit: int = 0,
         offset: int = 10,
-        current_user: User = Depends(auth_service.get_authenticated_user),
+        current_user: User = Depends(Auth.get_current_user),
         db: AsyncSession = Depends(get_db),
 ):
     comments = await repository_comments.get_user_comments(limit, offset, user_id, db)

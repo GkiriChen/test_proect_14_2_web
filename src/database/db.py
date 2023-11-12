@@ -40,7 +40,7 @@ class DatabaseSessionManager:
 
 
 
-sessionmanager = DatabaseSessionManager(settings.sqlalchemy_database_url)
+sessionmanager = DatabaseSessionManager(settings.postgres_url)
 
 
 # Dependency
