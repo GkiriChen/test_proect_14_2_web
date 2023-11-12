@@ -15,6 +15,7 @@ router = APIRouter(prefix="/comments", tags=['Comments'])
 @router.post("/publish", status_code=status.HTTP_201_CREATED,
              description=THE_MANY_REQUESTS,
              dependencies=[Depends(Ratelimiter(times=10, seconds=60))],
+             response_model=CommentSchema
              )
 async def post_comment(
         photo_id: int = Form(...),
@@ -31,7 +32,7 @@ async def post_comment(
 
 @router.patch(
     "/update",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_200_OK, response_model=CommentUpdateSchema
 )
 async def change_comment(
         comment_id: int = Form(...),
@@ -48,7 +49,7 @@ async def change_comment(
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
-@router.delete("/delete")
+@router.delete("/delete", response_model=CommentRemoveSchema)
 async def remove_comment(
         comment_id: int = Form(...),
         current_user: User = Depends(auth_service.get_authenticated_user),
@@ -66,7 +67,7 @@ async def remove_comment(
     return {"detail": DELETED_SUCCESSFUL}
 
 
-@router.get("/photos/{photo_id}")
+@router.get("/photos/{photo_id}", response_model=CommentPhotoList)
 async def show_photo_comments(
         photo_id: int,
         limit: int = 0,
@@ -78,7 +79,7 @@ async def show_photo_comments(
     return {"comments": comments}
 
 
-@router.get("/users/{users_id}")
+@router.get("/users/{users_id}", response_model=CommentUserList)
 async def show_user_comments(
         user_id: int,
         limit: int = 0,
