@@ -13,21 +13,20 @@ Base = declarative_base()
 
 ## ----Create ----#
 
-class UserRole(Base):
-    __tablename__ = "user_roles"
+class UserRole(Base):  #  Не змінювати!
+    __tablename__ = "userroles"
     id = Column(Integer, primary_key=True, index=True)
     role_name = Column(String, unique=True, index=True)
 
-    users = relationship("User", back_populates="role")
 
-    __allow_unmapped__ = True
-
-class User(Base):
+class User(Base):  # Не змінювати!
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     role_id = Column('role_id', ForeignKey(
         'userroles.id', ondelete='CASCADE'), default=3)
     username = Column(String(50))
+    first_name = Column(String(50))
+    last_name = Column(String(50))
     email = Column(String(250), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
     created_at = Column('crated_at', DateTime, default=func.now())
