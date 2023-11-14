@@ -2,7 +2,7 @@ import enum
 
 from datetime import datetime, date
 
-from sqlalchemy import Column, Integer, Text, String, Boolean, func
+from sqlalchemy import Column, Integer, Text, String, Boolean, func, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.sql.schema import ForeignKey
@@ -12,6 +12,13 @@ Base = declarative_base()
 
 
 ## ----Create ----#
+photo_tags = Table(
+    'photo_tags',
+    Base.metadata,
+    Column('photo_id', Integer, ForeignKey('photos.id')),
+    Column('tag_id', Integer, ForeignKey('tags.id'))
+)
+
 
 class UserRole(Base):  #  Не змінювати!
     __tablename__ = "userroles"
@@ -24,9 +31,9 @@ class User(Base):  # Не змінювати!
     id = Column(Integer, primary_key=True)
     role_id = Column('role_id', ForeignKey(
         'userroles.id', ondelete='CASCADE'), default=3)
-    username = Column(String(50))
-    first_name = Column(String(50))
-    last_name = Column(String(50))
+    username = Column(String(50), nullable=False, unique=True)
+    first_name = Column(String(50), nullable=True)
+    last_name = Column(String(50), nullable=True)
     email = Column(String(250), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
     created_at = Column('crated_at', DateTime, default=func.now())
@@ -36,12 +43,19 @@ class User(Base):  # Не змінювати!
     ban = Column(Boolean, default=False)
 
 
+class Tag(Base):
+    __tablename__ = "tags"
+    id = Column(Integer, primary_key=True)
+    tag_name = Column(String(25), unique=True)
+
+
 class Photo(Base):
     __tablename__ = "photos"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     user: Mapped["User"] = relationship("User", back_populates="photos")
+    tags: Mapped[list["Tag"]] = relationship("Tag", secondary=photo_tags, back_populates="photos")
     comments: Mapped[list["Comment"]] = relationship(
         "Comment", back_populates="photo", cascade="all, delete-orphan"
     )
