@@ -2,16 +2,22 @@ import enum
 
 from datetime import datetime, date
 
-from sqlalchemy import Column, Integer, Text, String, Boolean, func
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, Text, String, Boolean, func, Table
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
+from .db import Base
 
-Base = declarative_base()
 
 
 ## ----Create ----#
+photo_tags = Table(
+    'photo_tags',
+    Base.metadata,
+    Column('photo_id', Integer, ForeignKey('photos.id')),
+    Column('tag_id', Integer, ForeignKey('tags.id'))
+)
+
 
 class UserRole(Base):  #  Не змінювати!
     __tablename__ = "userroles"
@@ -24,9 +30,9 @@ class User(Base):  # Не змінювати!
     id = Column(Integer, primary_key=True)
     role_id = Column('role_id', ForeignKey(
         'userroles.id', ondelete='CASCADE'), default=3)
-    username = Column(String(50))
-    first_name = Column(String(50))
-    last_name = Column(String(50))
+    username = Column(String(50), nullable=False, unique=True)
+    first_name = Column(String(50), nullable=True)
+    last_name = Column(String(50), nullable=True)
     email = Column(String(250), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
     created_at = Column('crated_at', DateTime, default=func.now())
@@ -36,12 +42,19 @@ class User(Base):  # Не змінювати!
     ban = Column(Boolean, default=False)
 
 
+class Tag(Base):
+    __tablename__ = "tags"
+    id = Column(Integer, primary_key=True)
+    tag_name = Column(String(25), unique=True)
+
+
 class Photo(Base):
     __tablename__ = "photos"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     user: Mapped["User"] = relationship("User", back_populates="photos")
+    tags: Mapped[list["Tag"]] = relationship("Tag", secondary=photo_tags, back_populates="photos")
     comments: Mapped[list["Comment"]] = relationship(
         "Comment", back_populates="photo", cascade="all, delete-orphan"
     )
@@ -55,8 +68,18 @@ class Comment(Base):
     created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
     updated_at: Mapped[date] = mapped_column("updated_at", DateTime, default=func.now(), onupdate=func.now())
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
-    photo_id: Mapped[int] = mapped_column("photos_id", ForeignKey("photos_id", ondelete="CASCADE"), default=None)
+    photo_id: Mapped[int] = mapped_column("photos_id", ForeignKey("photos.id", ondelete="CASCADE"), default=None)
     update_status: Mapped[bool] = mapped_column(Boolean, default=False)
 
     user: Mapped[int] = relationship("User", backref="comments")
     photo: Mapped["Photo"] = relationship("Photo", back_populates="comments")
+
+class TransformPhotos(Base):
+    __tablename__ = 'transform_photos'
+
+    id = Column(Integer, primary_key=True)
+    photo_url = Column(String, nullable=False)
+    photo_id = Column(Integer, ForeignKey(Photo.id, ondelete="CASCADE"))
+    created_at = Column('created_at', DateTime, default=func.now())
+
+    photo = relationship('Photo', backref="transform_posts")
