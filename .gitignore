@@ -4,4 +4,3 @@
 __pycache__/
 postgres-data/
 poetry.lock
-migration/versions/

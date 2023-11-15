@@ -38,8 +38,6 @@ class DatabaseSessionManager:
             await session.close()
 
 
-
-
 sessionmanager = DatabaseSessionManager(settings.postgres_url)
 
 
