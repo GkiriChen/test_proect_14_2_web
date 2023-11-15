@@ -38,8 +38,6 @@ class DatabaseSessionManager:
             await session.close()
 
 
-
-
 sessionmanager = DatabaseSessionManager(settings.postgres_url)
 
 
@@ -47,3 +45,8 @@ sessionmanager = DatabaseSessionManager(settings.postgres_url)
 async def get_db():
     async with sessionmanager.session() as session:
         yield session
+
+
+# engine = create_engine(settings.postgres_url, echo=False, pool_size=5, pool_pre_ping=True)
+# Session = sessionmaker(bind=engine)
+# session = Session()
