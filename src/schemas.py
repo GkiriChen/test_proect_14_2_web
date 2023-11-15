@@ -1,8 +1,26 @@
 
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, EmailStr
 from src.database.models import UserRole
+
+
+class ImageTagModel(BaseModel):
+    tag_name: str
+
+
+class ImageTagResponse(BaseModel):
+    tag_name: str
+
+
+class PhotoBase(BaseModel):
+    description: str
+
+
+class PhotoModels(PhotoBase):
+    id: int
+    user_id: int
+    tags: List[ImageTagResponse]
 
 
 class RequestRoleConfig:
