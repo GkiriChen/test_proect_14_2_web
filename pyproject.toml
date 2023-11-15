@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "app"
+name = "src"
 version = "0.1.0"
 description = ""
 authors = ["GkiriChen <128749954+GkiriChen@users.noreply.github.com>"]
@@ -11,7 +11,6 @@ fastapi = "^0.104.1"
 uvicorn = {extras = ["standard"], version = "^0.24.0.post1"}
 sqlalchemy = "^2.0.23"
 fastapi-limiter = "0.1.5"
-psycopg2 = "^2.9.9"
 alembic = "^1.12.1"
 pydantic = "^2.4.2"
 libgravatar = "^1.0.4"
