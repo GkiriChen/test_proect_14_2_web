@@ -74,6 +74,7 @@ class Comment(Base):
     user: Mapped[int] = relationship("User", backref="comments")
     photo: Mapped["Photo"] = relationship("Photo", back_populates="comments")
 
+
 class TransformPhotos(Base):
     __tablename__ = 'transform_photos'
 
@@ -82,4 +83,4 @@ class TransformPhotos(Base):
     photo_id = Column(Integer, ForeignKey(Photo.id, ondelete="CASCADE"))
     created_at = Column('created_at', DateTime, default=func.now())
 
-    photo = relationship('Photo', backref="transform_posts")
+    photo = relationship('Photo', backref="transform_photos")
