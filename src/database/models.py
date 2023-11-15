@@ -69,7 +69,7 @@ class Comment(Base):
     created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
     updated_at: Mapped[date] = mapped_column("updated_at", DateTime, default=func.now(), onupdate=func.now())
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
-    photo_id: Mapped[int] = mapped_column("photos_id", ForeignKey("photos_id", ondelete="CASCADE"), default=None)
+    photo_id: Mapped[int] = mapped_column("photos_id", ForeignKey("photos.id", ondelete="CASCADE"), default=None)
     update_status: Mapped[bool] = mapped_column(Boolean, default=False)
 
     user: Mapped[int] = relationship("User", backref="comments")
