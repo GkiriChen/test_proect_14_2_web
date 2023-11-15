@@ -1,11 +1,14 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    postgres_url: str = 'db_URL'
-    cloudinary_name: str = 'cloud_name'
-    cloudinary_api_key: str = 'api_key'
-    cloudinary_api_secret: str = 'api_secret'
+    postgres_db: str
+    postgres_user: str
+    postgres_password: str
+    postgres_url: str
+    cloudinary_name: str
+    cloudinary_api_key: str
+    cloudinary_api_secret: str
     secret_key: str
     algorithm: str
     mail_username: str
