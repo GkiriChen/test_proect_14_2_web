@@ -61,7 +61,6 @@ sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.6
 sphinxcontrib-serializinghtml==1.1.9
 SQLAlchemy==2.0.23
--e git+https://github.com/GkiriChen/test_proect_14_2_web.git@96c0f80b1bbcbbc55b15285e7e0d0d299ec6d41e#egg=src
 starlette==0.27.0
 tomli==2.0.1
 typing_extensions==4.8.0
