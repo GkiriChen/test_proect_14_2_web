@@ -24,9 +24,9 @@ class User(Base):  # Не змінювати!
     id = Column(Integer, primary_key=True)
     role_id = Column('role_id', ForeignKey(
         'userroles.id', ondelete='CASCADE'), default=3)
-    username = Column(String(50))
-    first_name = Column(String(50))
-    last_name = Column(String(50))
+    username = Column(String(50), nullable=False, unique=True)
+    first_name = Column(String(50), nullable=True)
+    last_name = Column(String(50), nullable=True)
     email = Column(String(250), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
     created_at = Column('crated_at', DateTime, default=func.now())

@@ -68,8 +68,14 @@ class UserDb(BaseModel):
 
     :param id: The unique identifier of the user.
     :type id: int
+    :param role_id: The unique identifier of the user`s role.
+    :type role_id: int
     :param username: The username of the user.
     :type username: str
+    :param first_name: The first name of the user.
+    :type first_name: str
+    :param last_name: The last name of the user.
+    :type last_name: str
     :param email: The email address of the user.
     :type email: str
     :param created_at: The date and time when the user account was created.
@@ -78,7 +84,10 @@ class UserDb(BaseModel):
     :type avatar: str
     """
     id: int
+    role_id: int
     username: str
+    first_name: str
+    last_name: str
     email: str
     created_at: datetime
     avatar: str
