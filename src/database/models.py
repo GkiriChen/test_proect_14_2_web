@@ -55,9 +55,8 @@ class Photo(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     user: Mapped["User"] = relationship("User", back_populates="photos")
     tags: Mapped[list["Tag"]] = relationship("Tag", secondary=photo_tags, back_populates="photos")
-    comments: Mapped[list["Comment"]] = relationship(
-        "Comment", back_populates="photo", cascade="all, delete-orphan"
-    )
+    transform_photos: Mapped[list["TransformPhotos"]] = relationship("TransformPhotos", back_populates="photo")
+
 
 
 class Comment(Base):
@@ -71,8 +70,8 @@ class Comment(Base):
     photo_id: Mapped[int] = mapped_column("photos_id", ForeignKey("photos.id", ondelete="CASCADE"), default=None)
     update_status: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    user: Mapped[int] = relationship("User", backref="comments")
-    photo: Mapped["Photo"] = relationship("Photo", back_populates="comments")
+    # user: Mapped[int] = relationship("User", backref="comments")
+    # photo: Mapped["Photo"] = relationship("Photo", back_populates="comments")
 
 
 class TransformPhotos(Base):

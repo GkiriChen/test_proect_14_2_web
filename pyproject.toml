@@ -20,6 +20,8 @@ python-multipart = "^0.0.6"
 redis = "4.6.0"
 
 cloudinary = "^1.36.0"
+pydantic-settings = "^2.1.0"
+asyncpg = "^0.29.0"
 
 
 [tool.poetry.group.dev.dependencies]
