@@ -45,6 +45,7 @@ async def signup(body: UserModel, background_tasks: BackgroundTasks, request: Re
 
 @router.post("/login", response_model=TokenModel)
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+    print("login")
     """
     Authenticate a user and issue access tokens.
 
@@ -55,7 +56,7 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = 
     :return: Access and refresh tokens for the user.
     :rtype: TokenModel
     """
-    user = await repository_users.get_user_by_email(body.username, db)
+    user = await repository_users.get_user_by_username(body.username, db)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email")
@@ -66,14 +67,15 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password")
     # Generate JWT
-    access_token = await auth_service.create_access_token(data={"sub": user.email})
-    refresh_token = await auth_service.create_refresh_token(data={"sub": user.email})
+    access_token = await auth_service.create_access_token(data={"sub": user.username})
+    refresh_token = await auth_service.create_refresh_token(data={"sub": user.username})
     await repository_users.update_token(user, refresh_token, db)
     return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
 
 @router.get('/refresh_token', response_model=TokenModel)
 async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security), db: AsyncSession = Depends(get_db)):
+    print('refresh_token')
     """
     Refresh the access token using the refresh token.
 
@@ -85,8 +87,11 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(sec
     :rtype: TokenModel
     """
     token = credentials.credentials
+    print(token)
     email = await auth_service.decode_refresh_token(token)
+    print(email)
     user = await repository_users.get_user_by_email(email, db)
+    print(user)
     if user.refresh_token != token:
         await repository_users.update_token(user, None, db)
         raise HTTPException(

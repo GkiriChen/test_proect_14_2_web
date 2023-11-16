@@ -8,6 +8,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 
+async def get_user_by_username(username: str, db: AsyncSession) -> User:
+    """
+    Retrieves a user by their email from the database.
+
+    :param email: The email address of the user to retrieve.
+    :type email: str
+    :param db: The database session.
+    :type db: AsyncSession
+    :return: The user with the specified email, or None if not found.
+    :rtype: User | None
+    """
+    statement = select(User).where(User.username == username)
+    result = await db.execute(statement)
+    return result.scalars().first()
+
 async def get_user_by_email(email: str, db: AsyncSession) -> User:
     """
     Retrieves a user by their email from the database.
@@ -22,9 +37,6 @@ async def get_user_by_email(email: str, db: AsyncSession) -> User:
     statement = select(User).where(User.email == email)
     result = await db.execute(statement)
     return result.scalars().first()
-
-    #return db.query(User).filter(User.email == email).first()
-
 
 async def create_user(body: UserModel, db: AsyncSession) -> User:
     """
@@ -63,7 +75,7 @@ async def update_token(user: User, token: str | None, db: AsyncSession) -> None:
     :return: None
     """
     user.refresh_token = token
-    db.commit()
+    await db.commit()
 
 
 async def confirmed_email(email: str, db: AsyncSession) -> None:
@@ -78,7 +90,7 @@ async def confirmed_email(email: str, db: AsyncSession) -> None:
     """
     user = await get_user_by_email(email, db)
     user.confirmed = True
-    db.commit()
+    await db.commit()
 
 
 async def update_avatar(email, url: str, db: AsyncSession) -> User:

@@ -74,6 +74,7 @@ class Auth:
 
     # define a function to generate a new refresh token
     async def create_refresh_token(self, data: dict, expires_delta: Optional[float] = None):
+        print("crate_ref_tok")
         """
         Create a refresh token for a user.
 
@@ -96,6 +97,7 @@ class Auth:
         return encoded_refresh_token
 
     async def decode_refresh_token(self, refresh_token: str):
+        print('Хелоу декодер')
         """
         Decode and verify a refresh token.
 
@@ -107,6 +109,7 @@ class Auth:
         try:
             payload = jwt.decode(
                 refresh_token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+            print(payload)
             if payload['scope'] == 'refresh_token':
                 email = payload['sub']
                 return email
