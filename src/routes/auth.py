@@ -1,10 +1,6 @@
-from typing import List
-
 from fastapi import APIRouter, HTTPException, Depends, status, Security, BackgroundTasks, Request
 from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import sessionmaker
 
 from src.database.db import get_db
 from src.schemas import UserModel, UserResponse, TokenModel, RequestEmail
