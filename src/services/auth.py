@@ -74,6 +74,7 @@ class Auth:
 
     # define a function to generate a new refresh token
     async def create_refresh_token(self, data: dict, expires_delta: Optional[float] = None):
+        print("crate_ref_tok")
         """
         Create a refresh token for a user.
 
