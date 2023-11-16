@@ -3,6 +3,8 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Depends, status, Security, BackgroundTasks, Request
 from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import sessionmaker
 
 from src.database.db import get_db
 from src.schemas import UserModel, UserResponse, TokenModel, RequestEmail
@@ -15,7 +17,7 @@ security = HTTPBearer()
 
 
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def signup(body: UserModel, background_tasks: BackgroundTasks, request: Request, db: Session = Depends(get_db)):
+async def signup(body: UserModel, background_tasks: BackgroundTasks, request: Request, db: AsyncSession = Depends(get_db)):
     """
     Register a new user.
 
@@ -26,7 +28,7 @@ async def signup(body: UserModel, background_tasks: BackgroundTasks, request: Re
     :param request: FastAPI request.
     :type request: Request
     :param db: Database session.
-    :type db: Session
+    :type db: AsyncSession
     :return: User object and a message indicating the successful user creation.
     :rtype: UserResponse
     """
@@ -42,14 +44,14 @@ async def signup(body: UserModel, background_tasks: BackgroundTasks, request: Re
 
 
 @router.post("/login", response_model=TokenModel)
-async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
     """
     Authenticate a user and issue access tokens.
 
     :param body: Authentication data (email and password).
     :type body: OAuth2PasswordRequestForm
     :param db: Database session.
-    :type db: Session
+    :type db: AsyncSession
     :return: Access and refresh tokens for the user.
     :rtype: TokenModel
     """
@@ -71,14 +73,14 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
 
 
 @router.get('/refresh_token', response_model=TokenModel)
-async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security), db: Session = Depends(get_db)):
+async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security), db: AsyncSession = Depends(get_db)):
     """
     Refresh the access token using the refresh token.
 
     :param credentials: Access credentials, including the refresh token.
     :type credentials: HTTPAuthorizationCredentials
     :param db: Database session.
-    :type db: Session
+    :type db: AsyncSession
     :return: Updated access and refresh tokens for the user.
     :rtype: TokenModel
     """
@@ -97,14 +99,14 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(sec
 
 
 @router.get('/confirmed_email/{token}')
-async def confirmed_email(token: str, db: Session = Depends(get_db)):
+async def confirmed_email(token: str, db: AsyncSession = Depends(get_db)):
     """
     Confirm a user's email using a confirmation token.
 
     :param token: Email confirmation token.
     :type token: str
     :param db: Database session.
-    :type db: Session
+    :type db: AsyncSession
     :return: A message indicating the email confirmation.
     :rtype: dict
     """
@@ -121,7 +123,7 @@ async def confirmed_email(token: str, db: Session = Depends(get_db)):
 
 @router.post('/request_email')
 async def request_email(body: RequestEmail, background_tasks: BackgroundTasks, request: Request,
-                        db: Session = Depends(get_db)):
+                        db: AsyncSession = Depends(get_db)):
     """
     Send an email confirmation request to a user.
 
@@ -132,7 +134,7 @@ async def request_email(body: RequestEmail, background_tasks: BackgroundTasks, r
     :param request: FastAPI request.
     :type request: Request
     :param db: Database session.
-    :type db: Session
+    :type db: AsyncSession
     :return: A message indicating that an email has been sent for confirmation.
     :rtype: dict
     """

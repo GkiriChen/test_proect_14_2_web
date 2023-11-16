@@ -62,6 +62,9 @@ class CommentRemoveSchema(BaseModel):
 from datetime import date, datetime
 from pydantic import BaseModel, EmailStr, Field
 
+class RoleModel(BaseModel):
+    id: int
+    role_name: str
 
 
 class UserModel(BaseModel):
@@ -76,6 +79,8 @@ class UserModel(BaseModel):
     :type password: str
     """
     username: str = Field(min_length=5, max_length=16)
+    first_name: str = Field(min_length=0, max_length=25)
+    last_name: str = Field(min_length=0, max_length=25)
     email: str
     password: str = Field(min_length=6, max_length=10)
 
