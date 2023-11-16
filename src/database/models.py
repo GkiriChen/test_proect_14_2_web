@@ -30,6 +30,7 @@ class User(Base):  # Не змінювати!
     id = Column(Integer, primary_key=True)
     role_id = Column('role_id', ForeignKey(
         'userroles.id', ondelete='CASCADE'), default=3)
+   
     username = Column(String(50), nullable=False, unique=True)
     first_name = Column(String(50), nullable=True)
     last_name = Column(String(50), nullable=True)
