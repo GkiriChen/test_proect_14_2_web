@@ -1,12 +1,15 @@
+from typing import List
+
 import src.repository.comments as repository_comments
 from src.database.db import get_db
 from fastapi import APIRouter, Depends, status, HTTPException, Form
-from fastapi_limiter.depends import Ratelimiter
+
 
 from src.services.auth import auth_service
 
-from src.database.models import User, UserRole
+from src.database.models import User
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.schemas import CommentSchema, CommentList, CommentUpdateSchems, CommentRemoveSchema, CommentUserList
 
 THE_MANY_REQUESTS = "No more than 10 requests in minute"
 DELETED_SUCCESSFUL = "You deleted SUCCESSFUL"
@@ -16,7 +19,7 @@ router = APIRouter(prefix="/comments", tags=['Comments'])
 
 @router.post("/publish", status_code=status.HTTP_201_CREATED,
              description=THE_MANY_REQUESTS,
-             dependencies=[Depends(Ratelimiter(times=10, seconds=60))],
+             # dependencies=[Depends(Ratelimiter(times=10, seconds=60))],
              response_model=CommentSchema
              )
 async def post_comment(
@@ -36,7 +39,7 @@ async def post_comment(
 
 @router.patch(
     "/update",
-    status_code=status.HTTP_200_OK, response_model=CommentUpdateSchema
+    status_code=status.HTTP_200_OK, response_model=CommentUpdateSchems
 )
 async def change_comment(
         comment_id: int = Form(...),
@@ -66,16 +69,16 @@ async def remove_comment(
     comment = await repository_comments.get_comment(comment_id, db)
     if not comment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    if comment.user_id != current_user.id and current_user.role not in [
-        UserRole.Moderator,
-        UserRole.Admin,
-    ]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+
+    if current_user.role_id not in [1, 2]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="You don't have permission to delete this comment.")
+
     await repository_comments.delete_comment(comment_id, db)
     return {"detail": DELETED_SUCCESSFUL}
 
-
-@router.get("/photos/{photo_id}", response_model=CommentPhotoList)
+@router.get("/photos/{photo_id}", response_model=CommentList)
 async def show_photo_comments(
         photo_id: int,
         limit: int = 0,
@@ -89,7 +92,7 @@ async def show_photo_comments(
     return {"comments": comments}
 
 
-@router.get("/users/{users_id}", response_model=CommentUserList)
+@router.get("/users/{users_id}", response_model=List[CommentSchema])
 async def show_user_comments(
         user_id: int,
         limit: int = 0,
