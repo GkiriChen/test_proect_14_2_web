@@ -2,7 +2,6 @@ from fastapi import FastAPI
 import uvicorn
 from src.routes import user_profile
 from src.routes import auth
-from src.routes import users
 from src.routes import photo
 from src.routes import roles
 
