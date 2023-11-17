@@ -9,7 +9,7 @@ from src.services.auth import auth_service
 
 from src.database.models import User
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.schemas import CommentSchema, CommentList, CommentUpdateSchems, CommentRemoveSchema, CommentUserList
+from src.schemas import CommentSchema, CommentList, CommentUpdateSchems, CommentRemoveSchema
 
 THE_MANY_REQUESTS = "No more than 10 requests in minute"
 DELETED_SUCCESSFUL = "You deleted SUCCESSFUL"
