@@ -1,7 +1,5 @@
 from src.schemas import UpdateUserProfileModel
-from typing import Optional
 from libgravatar import Gravatar
-from sqlalchemy.orm import Session
 from src.database.models import User
 from src.schemas import UserModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,10 +8,10 @@ from sqlalchemy.future import select
 
 async def get_user_by_username(username: str, db: AsyncSession) -> User:
     """
-    Retrieves a user by their email from the database.
+    Retrieves a user by their username from the database.
 
-    :param email: The email address of the user to retrieve.
-    :type email: str
+    :param username: The username of the user to retrieve.
+    :type username: str
     :param db: The database session.
     :type db: AsyncSession
     :return: The user with the specified email, or None if not found.
@@ -49,13 +47,22 @@ async def create_user(body: UserModel, db: AsyncSession) -> User:
     :return: The newly created user.
     :rtype: User
     """
+    result = await db.execute(select(User).limit(1))
+    existing_user = result.scalar()
+
+    if existing_user is None:   # First user is an admin
+        role_id = 1  
+    else:
+        role_id = 3
+
     avatar = None
     try:
         g = Gravatar(body.email)
         avatar = g.get_image()
     except Exception as e:
         print(e)
-    new_user = User(**body.dict(), avatar=avatar)
+
+    new_user = User(**body.dict(), role_id=role_id, avatar=avatar)
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)
@@ -108,7 +115,7 @@ async def update_avatar(email, url: str, db: AsyncSession) -> User:
     """
     user = await get_user_by_email(email, db)
     user.avatar = url
-    db.commit()
+    await db.commit()
     return user
 
 
@@ -136,7 +143,7 @@ async def update_user_profile(email: str, profile_data: UpdateUserProfileModel, 
     if profile_data.email:
         user.email = profile_data.email
 
-    db.commit()
-    db.refresh(user)
+    await db.commit()
+    await db.refresh(user)
 
     return user
