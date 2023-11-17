@@ -8,7 +8,7 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
 from src.repository import users as repository_users
@@ -74,6 +74,7 @@ class Auth:
 
     # define a function to generate a new refresh token
     async def create_refresh_token(self, data: dict, expires_delta: Optional[float] = None):
+        print("crate_ref_tok")
         """
         Create a refresh token for a user.
 
@@ -107,6 +108,7 @@ class Auth:
         try:
             payload = jwt.decode(
                 refresh_token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+            print(payload)
             if payload['scope'] == 'refresh_token':
                 email = payload['sub']
                 return email
@@ -116,14 +118,14 @@ class Auth:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail='Could not validate credentials')
 
-    async def get_current_user(self, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    async def get_current_user(self, token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
         """
         Get the current user based on the provided access token.
 
         :param token: The access token.
         :type token: str
         :param db: Database session.
-        :type db: Session
+        :type db: AsyncSession
         :return: The authenticated user.
         :rtype: User
         """

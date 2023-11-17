@@ -2,7 +2,6 @@ from typing import List
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 from src.database.models import Photo, Tag, User
 
 
