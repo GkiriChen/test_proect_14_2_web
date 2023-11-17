@@ -21,6 +21,7 @@ async def get_user_by_username(username: str, db: AsyncSession) -> User:
     result = await db.execute(statement)
     return result.scalars().first()
 
+
 async def get_user_by_email(email: str, db: AsyncSession) -> User:
     """
     Retrieves a user by their email from the database.
@@ -35,6 +36,7 @@ async def get_user_by_email(email: str, db: AsyncSession) -> User:
     statement = select(User).where(User.email == email)
     result = await db.execute(statement)
     return result.scalars().first()
+
 
 async def create_user(body: UserModel, db: AsyncSession) -> User:
     """
@@ -51,7 +53,7 @@ async def create_user(body: UserModel, db: AsyncSession) -> User:
     existing_user = result.scalar()
 
     if existing_user is None:   # First user is an admin
-        role_id = 1  
+        role_id = 1
     else:
         role_id = 3
 
@@ -134,14 +136,20 @@ async def update_user_profile(email: str, profile_data: UpdateUserProfileModel, 
     """
     user = await get_user_by_email(email, db)
 
-    if profile_data.avatar:
-        user.avatar = profile_data.avatar
-
     if profile_data.username:
         user.username = profile_data.username
 
+    if profile_data.first_name:
+        user.first_name = profile_data.first_name
+
+    if profile_data.last_name:
+        user.last_name = profile_data.last_name
+
     if profile_data.email:
         user.email = profile_data.email
+
+    if profile_data.password:
+        user.password = profile_data.password
 
     await db.commit()
     await db.refresh(user)
