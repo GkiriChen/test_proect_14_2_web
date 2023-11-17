@@ -53,12 +53,6 @@ class CommentUpdateSchems(BaseModel):
     text: str
 
 
-class CommentResponse(BaseModel):
-    username: str
-    text: str
-    photo_id: int
-
-
 class CommentRemoveSchema(BaseModel):
     id: int
 
