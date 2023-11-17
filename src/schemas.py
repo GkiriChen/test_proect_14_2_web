@@ -1,9 +1,8 @@
+from datetime import datetime
 
-from datetime import date, datetime
-from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from src.database.models import UserRole
 
 
