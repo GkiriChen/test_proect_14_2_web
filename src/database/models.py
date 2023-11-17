@@ -30,6 +30,7 @@ class User(Base):  # Не змінювати!
     id = Column(Integer, primary_key=True)
     role_id = Column('role_id', ForeignKey(
         'userroles.id', ondelete='CASCADE'), default=3)
+   
     username = Column(String(50), nullable=False, unique=True)
     first_name = Column(String(50), nullable=True)
     last_name = Column(String(50), nullable=True)
@@ -42,10 +43,12 @@ class User(Base):  # Не змінювати!
     ban = Column(Boolean, default=False)
 
 
+
 class Tag(Base):
     __tablename__ = "tags"
     id = Column(Integer, primary_key=True)
     tag_name = Column(String(25), unique=True)
+    photos = relationship("Photo", secondary=photo_tags, back_populates="tags")
 
 
 class Photo(Base):
@@ -53,7 +56,6 @@ class Photo(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
-    user: Mapped["User"] = relationship("User", back_populates="photos")
     tags: Mapped[list["Tag"]] = relationship("Tag", secondary=photo_tags, back_populates="photos")
     comments: Mapped[list["Comment"]] = relationship(
         "Comment", back_populates="photo", cascade="all, delete-orphan"

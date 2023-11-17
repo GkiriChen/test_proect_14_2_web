@@ -2,13 +2,13 @@ from typing import List
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 from src.database.models import Photo, Tag, User
+
 
 async def add_photo(body: Photo, tags: List[str], current_user: User, db: AsyncSession, url: str) -> Photo:
     # Логіка для додавання фото в базу даних
     photo = Photo(**body.dict(), user_id=current_user.id, avatar=url)
-    
+
     # Додаємо теги до фото
     for tag_name in tags:
         tag = await db.query(Tag).filter(Tag.tag_name == tag_name).first()
