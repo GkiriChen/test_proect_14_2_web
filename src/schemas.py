@@ -37,22 +37,35 @@ class RequestRole(BaseModel):
 
 
 class CommentSchema(BaseModel):
+    """
+    Schema for creating a comment.
+    """
     text: str = "some text"
     photo_id: int
 
 
 class CommentList(BaseModel):
+    """
+    Schema for listing comments.
+    """
     limit: int = 10
     offset: int = 0
     photo_id: int
 
 
 class CommentUpdateSchems(BaseModel):
+    """
+    Schema for updating a comment.
+    """
+
     id: int
     text: str
 
 
 class CommentRemoveSchema(BaseModel):
+    """
+    Schema for removing a comment.
+    """
     id: int
 
 

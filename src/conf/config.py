@@ -25,3 +25,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+from dotenv import load_dotenv
+
+load_dotenv()
