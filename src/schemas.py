@@ -1,4 +1,5 @@
-
+from datetime import date, datetime
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 
 from pydantic import BaseModel, EmailStr
@@ -26,13 +27,13 @@ class PhotoModels(PhotoBase):
 class RequestRoleConfig:
     arbitrary_types_allowed = True
 
+
 class RequestRole(BaseModel):
     email: EmailStr
     role: UserRole
-    
+
     class Config(RequestRoleConfig):
         pass
-
 
 
 class CommentSchema(BaseModel):
@@ -51,16 +52,9 @@ class CommentUpdateSchems(BaseModel):
     text: str
 
 
-class CommentResponse(BaseModel):
-    username: str
-    text: str
-    photo_id: int
-
-
 class CommentRemoveSchema(BaseModel):
     id: int
-from datetime import date, datetime
-from pydantic import BaseModel, EmailStr, Field
+
 
 class RoleModel(BaseModel):
     id: int
@@ -73,6 +67,10 @@ class UserModel(BaseModel):
 
     :param username: The username of the user.
     :type username: str
+    :param first_name: The first name of the user.
+    :type first_name: str
+    :param last_name: The first name of the user.
+    :type last_name: str
     :param email: The email address of the user.
     :type email: str
     :param password: The user's password.
@@ -157,18 +155,23 @@ class RequestEmail(BaseModel):
     """
     email: EmailStr
 
+
 class UpdateUserProfileModel(BaseModel):
     """
     Model for updating a user's profile.
 
-    :param avatar: The new avatar URL for the user.
-    :type avatar: Optional[str]
     :param username: The new username for the user.
     :type username: Optional[str]
+    :param first_name: The new first name for the user.
+    :type first_name: Optional[str]
+    :param last_name: The new last name for the user.
+    :type last_name: Optional[str]
     :param email: The new email address for the user.
     :type email: Optional[EmailStr]
     """
-    avatar: Optional[str]
-    username: Optional[str]
-    email: Optional[EmailStr]
 
+    username: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
+    email: Optional[EmailStr]
+    password: Optional[str]
