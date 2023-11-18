@@ -6,7 +6,7 @@ import cloudinary.uploader
 
 from src.repository import users as repository_users
 from src.repository import roles as repository_roles
-from src.schemas import UserDb, UpdateUserProfileModel, UserBan
+from src.schemas import TokenModel, UserDb, UpdateUserProfileModel
 from src.services.auth import auth_service
 from src.services.auth_admin import is_admin
 from src.database.db import get_db
@@ -52,8 +52,6 @@ async def get_own_profile(current_user: User = Depends(auth_service.get_current_
 
 @profile_router.put("/me/", response_model=UserDb)
 async def update_own_profile(user_data: UpdateUserProfileModel,
-                             background_tasks: BackgroundTasks,
-                             request: Request,
                              current_user: User = Depends(
                                  auth_service.get_current_user),
                              db: AsyncSession = Depends(get_db)):
@@ -62,10 +60,6 @@ async def update_own_profile(user_data: UpdateUserProfileModel,
 
     :param user_data: Updated user information.
     :type user_data: UpdateUserProfileModel
-    :param background_tasks: Background tasks to be executed after the request is processed.
-    :type background_tasks: BackgroundTasks
-    :param request: The HTTP request being processed.
-    :type request: Request
     :param current_user: The currently authenticated user.
     :type current_user: UserDb
     :param db: Database session.
@@ -73,18 +67,8 @@ async def update_own_profile(user_data: UpdateUserProfileModel,
     :return: Updated user profile information.
     :rtype: UserDb
     """
-    new_email = user_data.email and current_user.email != user_data.email
-    if not user_data.email:
-        user_data.email = current_user.email
-    if user_data.password:
-        user_data.password = auth_service.get_password_hash(user_data.password)
-
     user = await repository_users.update_user_profile(current_user.email, user_data, db)
 
-    if new_email:
-        background_tasks.add_task(
-            send_email, user.email, user.username, request.base_url)
-        return {"user": user, "detail": "User successfully updated. Check your email for confirmation."}
     return user
 
 
@@ -116,6 +100,94 @@ async def update_user_avatar(file: UploadFile = File(), current_user: User = Dep
                         .build_url(width=250, height=250, crop='fill', version=r.get('version'))
     user = await repository_users.update_avatar(current_user.email, src_url, db)
     return user
+
+
+@profile_router.patch("/update-password", response_model=TokenModel)
+async def update_password(
+    new_password: str,
+    confirm_password: str,
+    token: str = Depends(auth_service.oauth2_scheme),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Update the user's password and return a new set of tokens.
+
+    :param new_password: The new password for the user.
+    :type new_password: str
+    :param token: The user's access token.
+    :type token: str
+    :param db: Database session.
+    :type db: AsyncSession
+    :return: New access and refresh tokens.
+    :rtype: TokenModel
+    """
+    if new_password != confirm_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Passwords do not match",
+        )
+    email = await auth_service.get_email_from_token(token)
+
+    user = await repository_users.get_user_by_email(email, db)
+
+    if auth_service.verify_password(new_password, user.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password already in use",
+        )
+    hashed_password = auth_service.get_password_hash(new_password)
+    await repository_users.update_user_password(user, hashed_password, db)
+
+    access_token = await auth_service.create_access_token(data={"sub": user.email})
+    refresh_token = await auth_service.create_refresh_token(data={"sub": user.email})
+    await repository_users.update_token(user, refresh_token, db)
+
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+
+
+@profile_router.patch("/update-email", response_model=TokenModel)
+async def update_email(
+    new_email: str,
+    background_tasks: BackgroundTasks,
+    request: Request,
+    token: str = Depends(auth_service.oauth2_scheme),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Update the user's email and return a new set of tokens.
+
+    :param new_email: The new email for the user.
+    :type new_email: str
+    :param background_tasks: Background tasks to be executed after the request is processed.
+    :type background_tasks: BackgroundTasks
+    :param request: The HTTP request being processed.
+    :type request: Request
+    :param db: Database session.
+    :type db: AsyncSession
+    :return: New access and refresh tokens.
+    :rtype: TokenModel
+    """
+    try:
+        old_email = await auth_service.get_email_from_token(token)
+        user = await repository_users.get_user_by_email(old_email, db)
+        await repository_users.update_user_email(user, new_email, db)
+
+        background_tasks.add_task(
+            send_email, new_email, user.username, request.base_url)
+
+        new_access_token = await auth_service.create_access_token(data={"sub": new_email})
+        new_refresh_token = await auth_service.create_refresh_token(data={"sub": new_email})
+
+        await repository_users.update_token(user, new_refresh_token, db)
+
+        return {
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token,
+            "token_type": "bearer"
+        }
+
+    except HTTPException as e:
+        raise e
 
 
 @profile_router.put("/role", response_model=UserDb, dependencies=[Depends(is_admin)])
@@ -152,28 +224,3 @@ async def update_user_role(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Role is not found")
 
-
-@profile_router.put("/ban", response_model=UserBan, dependencies=[Depends(is_admin)])
-async def update_user_ban(
-    username: str = Form(...),
-    db: AsyncSession = Depends(get_db),
-):
-    """
-    Update the ban status of a user.
-
-    :param username: The username of the user to update.
-    :type username: str
-    :param current_user: The currently authenticated user.
-    :type current_user: User
-    :param db: The database session.
-    :type db: AsyncSession
-    :return: The updated user with the new ban status.
-    :rtype: UserBan
-    """
-
-    user = await repository_users.update_user_ban(username, db)
-    if user:
-        return user
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User is not found")

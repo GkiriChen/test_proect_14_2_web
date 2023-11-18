@@ -175,11 +175,8 @@ class UpdateUserProfileModel(BaseModel):
     :type first_name: Optional[str]
     :param last_name: The new last name for the user.
     :type last_name: Optional[str]
-    :param email: The new email address for the user.
-    :type email: Optional[str]
     """
+
     username: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]
-    email: Optional[str]
-    password: Optional[str]
