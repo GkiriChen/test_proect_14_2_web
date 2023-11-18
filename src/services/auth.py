@@ -195,4 +195,16 @@ class Auth:
                                 detail="Invalid token for email verification")
 
 
+    def add_to_blacklist(self, token: str, expires_delta: float):
+        """
+                Add the access_token to the "blacklist".
+
+                :param token: The access_token to add to the "blacklist".
+                :type token: str
+                :param expires_delta: The expiration time of the access_token in seconds.
+                :type expires_delta: float
+                """
+        self.r.setex(f"blacklist:{token}", int(expires_delta), "revoked")
+
+
 auth_service = Auth()
