@@ -8,6 +8,7 @@ from src.repository import users as repository_users
 from src.repository import roles as repository_roles
 from src.schemas import UserDb, UpdateUserProfileModel, UserBan
 from src.services.auth import auth_service
+from src.services.auth_admin import is_admin
 from src.database.db import get_db
 from src.database.models import User
 from src.conf.config import settings
@@ -117,11 +118,10 @@ async def update_user_avatar(file: UploadFile = File(), current_user: User = Dep
     return user
 
 
-@profile_router.put("/role", response_model=UserDb)
+@profile_router.put("/role", response_model=UserDb, dependencies=[Depends(is_admin)])
 async def update_user_role(
     role_id: int = Form(...),
     username: str = Form(...),
-    current_user: User = Depends(auth_service.get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -138,28 +138,24 @@ async def update_user_role(
     :return: The updated user with the new role.
     :rtype: UserDb
     """
-    if current_user.role_id == 1:
-        role = await repository_roles.get_role(role_id, db)
 
-        if role:
-            user = await repository_users.update_user_role(username, role_id, db)
-            if user:
-                return user
-            else:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="User is not found")
+    role = await repository_roles.get_role(role_id, db)
+
+    if role:
+        user = await repository_users.update_user_role(username, role_id, db)
+        if user:
+            return user
         else:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Role is not found")
+                status_code=status.HTTP_404_NOT_FOUND, detail="User is not found")
     else:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="ACCESS DENIED")
+            status_code=status.HTTP_404_NOT_FOUND, detail="Role is not found")
 
 
-@profile_router.put("/ban", response_model=UserBan)
+@profile_router.put("/ban", response_model=UserBan, dependencies=[Depends(is_admin)])
 async def update_user_ban(
     username: str = Form(...),
-    current_user: User = Depends(auth_service.get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -174,13 +170,10 @@ async def update_user_ban(
     :return: The updated user with the new ban status.
     :rtype: UserBan
     """
-    if current_user.role_id == 1:
-        user = await repository_users.update_user_ban(username, db)
-        if user:
-            return user
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User is not found")
+
+    user = await repository_users.update_user_ban(username, db)
+    if user:
+        return user
     else:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="ACCESS DENIED")
+            status_code=status.HTTP_404_NOT_FOUND, detail="User is not found")

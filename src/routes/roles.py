@@ -3,10 +3,9 @@ from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
-from src.database.models import User
 from src.schemas import RoleModel
 from src.repository import roles as repository_roles
-from src.services.auth import auth_service
+from src.services.auth_admin import is_admin
 
 
 router = APIRouter(prefix='/roles', tags=["roles"])
@@ -14,12 +13,11 @@ security = HTTPBearer()
 
 
 @router.post("/create", status_code=status.HTTP_201_CREATED,
-             response_model=RoleModel
+             response_model=RoleModel, dependencies=[Depends(is_admin)]
              )
 async def post_role(
         id: int = Form(...),
         role_name: str = Form(...),
-        current_user: User = Depends(auth_service.get_current_user),
         db: AsyncSession = Depends(get_db),
 ):
     """
@@ -36,22 +34,18 @@ async def post_role(
     :return: The newly created user role.
     :rtype: RoleModel
     """
-    if current_user.role_id == 1:
-        role = await repository_roles.create_role(id, role_name, db)
 
-        if role:
-            return role
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="ACCESS DENIED")
+    role = await repository_roles.create_role(id, role_name, db)
+
+    if role:
+        return role
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
-@router.put("/update", response_model=RoleModel)
+@router.put("/update", response_model=RoleModel, dependencies=[Depends(is_admin)])
 async def update_role(
         id: int = Form(...),
         role_name: str = Form(...),
-        current_user: User = Depends(auth_service.get_current_user),
         db: AsyncSession = Depends(get_db),
 ):
     """
@@ -68,13 +62,10 @@ async def update_role(
     :return: The updated user role.
     :rtype: RoleModel
     """
-    if current_user.role_id == 1:
-        role = await repository_roles.update_role(id, role_name, db)
 
-        if role:
-            return role
-        else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    role = await repository_roles.update_role(id, role_name, db)
+
+    if role:
+        return role
     else:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="ACCESS DENIED")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
