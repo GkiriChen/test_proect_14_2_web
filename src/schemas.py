@@ -130,6 +130,15 @@ class UserResponse(BaseModel):
     detail: str = "User successfully created"
 
 
+class UserBan(UserDb):
+    """Model for user ban information. Inherits from UserDb and includes ban status.
+
+    :param ban: Boolean indicating the ban status of the user.
+    :type ban: bool
+    """
+    ban: bool
+
+
 class TokenModel(BaseModel):
     """
     Model for an authentication token.
@@ -166,12 +175,8 @@ class UpdateUserProfileModel(BaseModel):
     :type first_name: Optional[str]
     :param last_name: The new last name for the user.
     :type last_name: Optional[str]
-    :param email: The new email address for the user.
-    :type email: Optional[EmailStr]
     """
 
     username: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]
-    email: Optional[EmailStr]
-    password: Optional[str]

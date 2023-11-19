@@ -1,12 +1,15 @@
+from fastapi import APIRouter, Depends, Form, HTTPException, status
 from fastapi import APIRouter, HTTPException, Depends, status, Security, BackgroundTasks, Request
 from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
+from jose import jwt
 
 from src.database.db import get_db
-from src.schemas import UserModel, UserResponse, TokenModel, RequestEmail
+from src.schemas import UserBan, UserModel, UserResponse, TokenModel, RequestEmail
 from src.repository import users as repository_users
 from src.services.auth import auth_service
 from src.services.email import send_email
+from src.services.auth_admin import is_admin
 
 router = APIRouter(prefix='/auth', tags=["auth"])
 security = HTTPBearer()
@@ -62,11 +65,32 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = 
     if not auth_service.verify_password(body.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password")
+    if user.ban:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="You have been banned")
+
     # Generate JWT
     access_token = await auth_service.create_access_token(data={"sub": user.email})
     refresh_token = await auth_service.create_refresh_token(data={"sub": user.email})
     await repository_users.update_token(user, refresh_token, db)
     return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+
+
+@router.post("/logout", status_code=200)
+async def logout(token: str = Depends(auth_service.oauth2_scheme)):
+    """
+    Log out the user and add their access_token to the "blacklist".
+
+    :param token: The user's access_token for logging out.
+    :type token: str
+    """
+    # Get the expiration time of the access_token
+    payload = jwt.decode(token, auth_service.SECRET_KEY,
+                         algorithms=[auth_service.ALGORITHM])
+    expires_delta = payload["exp"] - payload["iat"]
+
+    auth_service.add_to_blacklist(token, expires_delta)
+    return {"message": "Successfully logged out"}
 
 
 @router.get('/refresh_token', response_model=TokenModel)
@@ -83,11 +107,8 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(sec
     :rtype: TokenModel
     """
     token = credentials.credentials
-    print(token)
     email = await auth_service.decode_refresh_token(token)
-    print(email)
     user = await repository_users.get_user_by_email(email, db)
-    print(user)
     if user.refresh_token != token:
         await repository_users.update_token(user, None, db)
         raise HTTPException(
@@ -146,3 +167,29 @@ async def request_email(body: RequestEmail, background_tasks: BackgroundTasks, r
         background_tasks.add_task(
             send_email, user.email, user.username, request.base_url)
     return {"message": "Check your email for confirmation."}
+
+
+@router.put("/ban", response_model=UserBan, dependencies=[Depends(is_admin)])
+async def update_user_ban(
+    username: str = Form(...),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Update the ban status of a user.
+
+    :param username: The username of the user to update.
+    :type username: str
+    :param current_user: The currently authenticated user.
+    :type current_user: User
+    :param db: The database session.
+    :type db: AsyncSession
+    :return: The updated user with the new ban status.
+    :rtype: UserBan
+    """
+
+    user = await repository_users.update_user_ban(username, db)
+    if user:
+        return user
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User is not found")

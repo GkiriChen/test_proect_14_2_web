@@ -87,6 +87,39 @@ async def update_token(user: User, token: str | None, db: AsyncSession) -> None:
     await db.commit()
 
 
+async def update_user_password(user: User, hashed_password: str, db: AsyncSession):
+    """
+    Update the user's password in the database.
+
+    :param user: The user whose password needs to be updated.
+    :type user: User
+    :param hashed_password: The hashed new password.
+    :type hashed_password: str
+    :param db: Database session.
+    :type db: AsyncSession
+    """
+    user.password = hashed_password
+    await db.commit()
+    await db.refresh(user)
+
+
+async def update_user_email(user: User, new_email: str, db: AsyncSession):
+    """
+    Update the user's email in the database.
+
+    :param user: The user to update.
+    :type user: User
+    :param new_email: The new email for the user.
+    :type new_email: str
+    :param db: Database session.
+    :type db: AsyncSession
+    """
+    user.email = new_email
+    user.confirmed = False
+
+    await db.commit()
+
+
 async def confirmed_email(email: str, db: AsyncSession) -> None:
     """
     Marks a user's email as confirmed in the database.
@@ -145,13 +178,46 @@ async def update_user_profile(email: str, profile_data: UpdateUserProfileModel, 
     if profile_data.last_name:
         user.last_name = profile_data.last_name
 
-    if profile_data.email:
-        user.email = profile_data.email
-
-    if profile_data.password:
-        user.password = profile_data.password
-
     await db.commit()
-    await db.refresh(user)
+
+    return user
+
+
+async def update_user_role(username: str, role_id: int, db: AsyncSession) -> User:
+    """
+    Update the role of a user in the database.
+
+    :param username: The username of the user to update.
+    :type username: str
+    :param role_id: The new role ID for the user.
+    :type role_id: int
+    :param db: The database session.
+    :type db: AsyncSession
+    :return: The user with the updated role information.
+    :rtype: User
+    """
+    user = await get_user_by_username(username, db)
+    if user:
+        user.role_id = role_id
+        await db.commit()
+
+    return user
+
+
+async def update_user_ban(username: str, db: AsyncSession) -> User:
+    """
+    Toggle the ban status of a user in the database.
+
+    :param username: The username of the user to update.
+    :type username: str
+    :param db: The database session.
+    :type db: AsyncSession
+    :return: The user with the updated ban status.
+    :rtype: User
+    """
+    user = await get_user_by_username(username, db)
+    if user:
+        user.ban = not user.ban
+        await db.commit()
 
     return user
