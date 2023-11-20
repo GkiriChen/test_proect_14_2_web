@@ -57,6 +57,14 @@ class CommentRemoveSchema(BaseModel):
 
 
 class RoleModel(BaseModel):
+    """
+    Model for a user role. Contains role information for registration.
+
+    :param id: The id of the role.
+    :type id: int
+    :param role_name: The name of the role.
+    :type role_name: str
+    """
     id: int
     role_name: str
 
