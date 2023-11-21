@@ -30,7 +30,7 @@ def is_moderator(current_user: User = Depends(auth_service.get_current_user)):
     :return: The authenticated user if they have moderator privileges.
     :rtype: User
     """
-    if current_user.role_id != 1 or current_user.role_id != 2:
+    if current_user.role_id != 1 and current_user.role_id != 2:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Access denied. You do not have moderator status."
         )
