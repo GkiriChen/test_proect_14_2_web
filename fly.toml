@@ -1,0 +1,33 @@
+# fly.toml app configuration file generated for v5-2-2 on 2023-11-21T14:40:41+02:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "v5-2-2"
+primary_region = "waw"
+
+[build]
+
+[env]
+  ALGORITHM = "HS256"
+  CLOUDINARY_API_KEY = "335625953666828"
+  CLOUDINARY_API_SECRET = "MBR6lfl8BRujgob8868ef8hpXP0"
+  CLOUDINARY_NAME = "dqmlojrsc"
+  MAIL_FROM = "pythonweb14@meta.ua"
+  MAIL_PASSWORD = "PythonWeb14"
+  MAIL_PORT = "465"
+  MAIL_SERVER = "smtp.meta.ua"
+  MAIL_USERNAME = "pythonweb14@meta.ua"
+  POSTGRES_DB = "yuxhtyre"
+  POSTGRES_PASSWORD = "H1evezO8PZ1yFDIVKFG3JHp1azcZS8BO"
+  POSTGRES_URL = "postgresql+asyncpg://yuxhtyre:H1evezO8PZ1yFDIVKFG3JHp1azcZS8BO@flora.db.elephantsql.com/yuxhtyre"
+  POSTGRES_USER = "yuxhtyre"
+  SECRET_KEY = "secret_key"
+  
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]

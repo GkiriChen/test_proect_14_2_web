@@ -11,13 +11,6 @@ from .db import Base
 
 
 ## ----Create ----#
-photo_tags = Table(
-    'photo_tags',
-    Base.metadata,
-    Column('photo_id', Integer, ForeignKey('photos.id')),
-    Column('tag_id', Integer, ForeignKey('tags.id'))
-)
-
 
 class UserRole(Base):  #  Не змінювати!
     __tablename__ = "userroles"
@@ -42,25 +35,29 @@ class User(Base):  # Не змінювати!
     confirmed = Column(Boolean, default=False)
     ban = Column(Boolean, default=False)
 
+class TagsImages(Base):
+    __tablename__ = "tags_images"
+    id = Column(Integer, primary_key=True)
+    image_id = Column('image_id', Integer, ForeignKey('images.id', ondelete="CASCADE"))
+    tag_id = Column('tag_id', Integer, ForeignKey('tags.id', ondelete="CASCADE"))
+
+class Image(Base):
+    __tablename__ = "images"
+    id = Column(Integer, primary_key=True)
+    image_url = Column(String(255), unique=True, nullable=False)
+    qr_code_url = Column(String(255), unique=True)
+    public_id = Column(String(255), unique=True, nullable=False)
+    user_id = Column('user_id', ForeignKey('users.id', ondelete='CASCADE'))
+    created_at = Column('created_at', DateTime, default=func.now())
+    updated_at = Column('updated_at', DateTime, default=func.now())
+    description = Column(String(255))
+    user = relationship('User', backref="images")
 
 
 class Tag(Base):
     __tablename__ = "tags"
-    id = Column(Integer, primary_key=True)
-    tag_name = Column(String(25), unique=True)
-    photos = relationship("Photo", secondary=photo_tags, back_populates="tags")
-
-
-class Photo(Base):
-    __tablename__ = "photos"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
-    tags: Mapped[list["Tag"]] = relationship("Tag", secondary=photo_tags, back_populates="photos")
-    comments: Mapped[list["Comment"]] = relationship(
-        "Comment", back_populates="photo", cascade="all, delete-orphan"
-    )
-
+    id = Column(Integer, primary_key=True, index=True)
+    tag = Column(String, unique=True)
 
 class Comment(Base):
     __tablename__ = "comments"
@@ -77,12 +74,3 @@ class Comment(Base):
     photo: Mapped["Photo"] = relationship("Photo", back_populates="comments")
 
 
-class TransformPhotos(Base):
-    __tablename__ = 'transform_photos'
-
-    id = Column(Integer, primary_key=True)
-    photo_url = Column(String, nullable=False)
-    photo_id = Column(Integer, ForeignKey(Photo.id, ondelete="CASCADE"))
-    created_at = Column('created_at', DateTime, default=func.now())
-
-    photo = relationship('Photo', backref="transform_photos")
