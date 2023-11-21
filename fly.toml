@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for v5-2-2 on 2023-11-21T14:40:41+02:00
+# fly.toml app configuration file generated for team6-photoshare on 2023-11-22T01:14:48+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "v5-2-2"
+app = "team6-photoshare"
 primary_region = "waw"
 
 [build]
@@ -18,12 +18,12 @@ primary_region = "waw"
   MAIL_PORT = "465"
   MAIL_SERVER = "smtp.meta.ua"
   MAIL_USERNAME = "pythonweb14@meta.ua"
-  POSTGRES_DB = "yuxhtyre"
-  POSTGRES_PASSWORD = "H1evezO8PZ1yFDIVKFG3JHp1azcZS8BO"
-  POSTGRES_URL = "postgresql+asyncpg://yuxhtyre:H1evezO8PZ1yFDIVKFG3JHp1azcZS8BO@flora.db.elephantsql.com/yuxhtyre"
-  POSTGRES_USER = "yuxhtyre"
+  POSTGRES_DB = "hxtyzqkm"
+  POSTGRES_PASSWORD = "N5_lWtjLWL0tnHB2z0awAktcta6pcuIH"
+  POSTGRES_URL = "postgresql+asyncpg://hxtyzqkm:N5_lWtjLWL0tnHB2z0awAktcta6pcuIH@trumpet.db.elephantsql.com/hxtyzqkm"
+  POSTGRES_USER = "hxtyzqkm"
   SECRET_KEY = "secret_key"
-  
+
 [http_service]
   internal_port = 8080
   force_https = true

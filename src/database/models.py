@@ -18,23 +18,6 @@ class UserRole(Base):  #  Не змінювати!
     role_name = Column(String, unique=True, index=True)
 
 
-class User(Base):  # Не змінювати!
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True)
-    role_id = Column('role_id', ForeignKey(
-        'userroles.id', ondelete='CASCADE'), default=3)
-   
-    username = Column(String(50), nullable=False, unique=True)
-    first_name = Column(String(50), nullable=True)
-    last_name = Column(String(50), nullable=True)
-    email = Column(String(250), nullable=False, unique=True)
-    password = Column(String(255), nullable=False)
-    created_at = Column('crated_at', DateTime, default=func.now())
-    avatar = Column(String(255), nullable=True)
-    refresh_token = Column(String(255), nullable=True)
-    confirmed = Column(Boolean, default=False)
-    ban = Column(Boolean, default=False)
-
 class TagsImages(Base):
     __tablename__ = "tags_images"
     id = Column(Integer, primary_key=True)
@@ -59,18 +42,40 @@ class Tag(Base):
     id = Column(Integer, primary_key=True, index=True)
     tag = Column(String, unique=True)
 
+
+class User(Base):  # Не змінювати!
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True)
+    role_id = Column('role_id', ForeignKey(
+        'userroles.id', ondelete='CASCADE'), default=3)
+   
+    username = Column(String(50), nullable=False, unique=True)
+    first_name = Column(String(50), nullable=True)
+    last_name = Column(String(50), nullable=True)
+    email = Column(String(250), nullable=False, unique=True)
+    password = Column(String(255), nullable=False)
+    created_at = Column('crated_at', DateTime, default=func.now())
+    avatar = Column(String(255), nullable=True)
+    refresh_token = Column(String(255), nullable=True)
+    confirmed = Column(Boolean, default=False)
+    ban = Column(Boolean, default=False)
+
+
+
 class Comment(Base):
     __tablename__ = "comments"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    text: Mapped[str] = mapped_column(Text, nullable=False)
-    created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
-    updated_at: Mapped[date] = mapped_column("updated_at", DateTime, default=func.now(), onupdate=func.now())
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
-    photo_id: Mapped[int] = mapped_column("photos_id", ForeignKey("photos.id", ondelete="CASCADE"), default=None)
-    update_status: Mapped[bool] = mapped_column(Boolean, default=False)
+    id = Column(Integer, primary_key=True)
+    text = Column(Text)
+    created_at =  Column('created_at', DateTime, default=func.now())
+    updated_at = Column('updated_at', DateTime)
 
-    user: Mapped[int] = relationship("User", backref="comments")
-    photo: Mapped["Photo"] = relationship("Photo", back_populates="comments")
+    user_id = Column(Integer, ForeignKey(User.id))
+    
+    photo_id = Column(Integer, ForeignKey(Image.id, ondelete="CASCADE"))
+    update_status = Column(Boolean, default=False)
+    #update_status: Mapped[bool] = mapped_column(Boolean, default=False)
 
+    user = relationship('User', backref="comments")
+    photo = relationship('Image', backref="comments")
 
