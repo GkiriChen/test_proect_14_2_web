@@ -11,7 +11,13 @@ from src.schemas_pictures import EditImageModel
 from src.services.auth import auth_service
 from src.repository import pictures as repository_pictures
 from src.services.cloud_image import CloudImage
+from src.services.auth_admin import is_admin, is_moderator, is_user
 
+all_users = [is_admin, is_moderator, is_user]
+only_adm_modeer = [is_admin, is_moderator]
+
+
+#dependencies=[Depends(is_admin)]) 
 router = APIRouter(prefix="/pictures", tags=['pictures'])
 
 

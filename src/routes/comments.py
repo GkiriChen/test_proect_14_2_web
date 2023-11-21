@@ -129,7 +129,7 @@ async def remove_comment(
     return {"detail": DELETED_SUCCESSFUL}
 
 
-@router.get("/photos/{photo_id}", response_model=CommentList)
+@router.get("/photos/{photo_id}", response_model=List[CommentSchema])
 async def show_photo_comments(
         photo_id: int,
         limit: int = 0,
@@ -158,8 +158,9 @@ async def show_photo_comments(
 
     :raises HTTPException 404: If the photo does not exist.
     """
-    comments = await repository_comments.get_photo_comments(limit, offset, photo_id, db)
-    return {"comments": comments}
+    comments = await repository_comments.get_photo_comments(limit, offset, photo_id, current_user, db)
+
+    return comments#{"comments": comments}
 
 
 @router.get("/users/{users_id}", response_model=List[CommentSchema])
@@ -192,4 +193,4 @@ async def show_user_comments(
     :raises HTTPException 404: If the user does not exist.
     """
     comments = await repository_comments.get_user_comments(limit, offset, user_id, db)
-    return {"comments": comments}
+    return comments

@@ -13,7 +13,7 @@ security = HTTPBearer()
 
 
 @router.post("/create", status_code=status.HTTP_201_CREATED,
-             response_model=RoleModel, dependencies=[Depends(is_admin)]
+             response_model=RoleModel#, dependencies=[Depends(is_admin)]
              )
 async def post_role(
         id: int = Form(...),

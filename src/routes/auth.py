@@ -93,7 +93,7 @@ async def logout(token: str = Depends(auth_service.oauth2_scheme)):
     return {"message": "Successfully logged out"}
 
 
-#@router.get('/refresh_token', response_model=TokenModel)
+@router.get('/refresh_token', response_model=TokenModel)
 async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security), db: AsyncSession = Depends(get_db)):
     print('refresh_token')
     """
@@ -120,7 +120,7 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(sec
     return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
 
-#@router.get('/confirmed_email/{token}')
+@router.get('/confirmed_email/{token}')
 async def confirmed_email(token: str, db: AsyncSession = Depends(get_db)):
     """
     Confirm a user's email using a confirmation token.
@@ -143,7 +143,7 @@ async def confirmed_email(token: str, db: AsyncSession = Depends(get_db)):
     return {"message": "Email confirmed"}
 
 
-#@router.post('/request_email')
+@router.post('/request_email')
 async def request_email(body: RequestEmail, background_tasks: BackgroundTasks, request: Request,
                         db: AsyncSession = Depends(get_db)):
     """

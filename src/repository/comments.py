@@ -1,3 +1,5 @@
+from datetime import datetime, date
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.database.models import Comment
@@ -58,6 +60,7 @@ async def update_comment(text: str, id: int, db: AsyncSession):
         try:
             comment.text = text
             comment.update_status = True
+            comment.updated_at = datetime.now()
             await db.commit()
             await db.refresh(comment)
             return comment
@@ -79,18 +82,20 @@ async def delete_comment(id: int, db: AsyncSession):
     :rtype: Comment
     """
     comment = await db.get(Comment, id)
+  
     if comment:
         try:
             await db.delete(comment)
-            await db.commit()
+            await db.commit()         
             return comment
         except Exception as e:
             await db.rollback()
-            raise e
+            raise e       
+
     return None
 
 
-async def get_photo_comments(offset: int, limit: int, photo_id: int, db: AsyncSession):
+async def get_photo_comments(offset: int, limit: int, photo_id: int, user: int, db: AsyncSession):
     """
     Gets comments on a specific photo with pagination.
 
@@ -100,14 +105,15 @@ async def get_photo_comments(offset: int, limit: int, photo_id: int, db: AsyncSe
     :param db: AsyncSession: The database session for performing operations.
     :return: list[Comment]: Pagination-aware list of comments on the photo.
     """
-    sql = (select(Comment)
-           # .options(selectinload(Comment.user))
-           .filter(Comment.photo_id == photo_id)
-           .offset(offset)
-           .limit(limit))
-    comments = await db.execute(sql)
-    result = comments.scalars().all()
-    return result
+    sql = await db.execute(select(Comment).filter(Comment.photo_id == photo_id, Comment.user_id == user.id).offset(offset).limit(limit))   
+    result = sql.fetchall()
+    if result:
+        comments = []
+        for res in result:
+            comments.append(res[0])
+        return comments
+    else:
+        return None
 
 
 async def get_user_comments(offset: int, limit: int, user_id: int, db: AsyncSession):
@@ -125,11 +131,15 @@ async def get_user_comments(offset: int, limit: int, user_id: int, db: AsyncSess
     :return: A list of comment objects.
     :rtype: list[Comment]
     """
-    sql = (select(Comment)
-           # .options(selectinload(Comment.user))
+    sql = await db.execute(select(Comment)
            .filter(Comment.user_id == user_id)
            .offset(offset)
            .limit(limit))
-    comments = await db.execute(sql)
-    result = comments.scalars().all()
-    return result
+    result = sql.fetchall()
+    if result:
+        comments = []
+        for res in result:
+            comments.append(res[0])
+        return comments
+    else:
+        return None
