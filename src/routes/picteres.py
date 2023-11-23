@@ -6,12 +6,13 @@ from typing import List
 import qrcode
 from src.database.db import get_db
 from src.database.models import User
-from src.schemas_pictures import ImageModel, ImageResponseCreated, ImageResponseEdited, ImageResponseUpdated
+from src.schemas_pictures import ImageModel, ImageResponseCreated, ImageResponseEdited, ImageResponseUpdated, ImageModellist
 from src.schemas_pictures import EditImageModel
 from src.services.auth import auth_service
 from src.repository import pictures as repository_pictures
 from src.services.cloud_image import CloudImage
 from src.services.auth_admin import is_admin, is_moderator, is_user
+from src.schemas import PhotoModels
 
 all_users = [is_admin, is_moderator, is_user]
 only_adm_modeer = [is_admin, is_moderator]
@@ -36,7 +37,7 @@ async def create_image(description: str,
     :param tags: TagModelAddToPicture: 5 tags
     :param image_file: UploadFile: The image file
     :param current_user: User: The user object
-    :param db: Session: A connection to our Postgres SQL database.
+    :param db: AsyncSession: A connection to our Postgres SQL database.
     :return: A image object
     """
 
@@ -48,7 +49,7 @@ async def create_image(description: str,
     return image
 
 
-@router.get("/", response_model=List[ImageModel], status_code=status.HTTP_200_OK)
+@router.get("/", response_model=List[ImageModellist], status_code=status.HTTP_200_OK) #
 async def get_images(limit: int = Query(10, le=50), offset: int = 0,
                      current_user: User = Depends(auth_service.get_current_user),
                      db: AsyncSession = Depends(get_db)):
@@ -58,7 +59,7 @@ async def get_images(limit: int = Query(10, le=50), offset: int = 0,
     :param limit: int: The number of images to return
     :param offset: int: The number of images to skip
     :param current_user: User: The user object
-    :param db: Session: A connection to our Postgres SQL database.
+    :param db: AsyncSession: A connection to our Postgres SQL database.
     :return: A list of image objects
     """
     images = await repository_pictures.get_images(limit, offset, current_user, db)
@@ -67,7 +68,7 @@ async def get_images(limit: int = Query(10, le=50), offset: int = 0,
     return images
 
 
-@router.get("/{image_id}", response_model=ImageModel, status_code=status.HTTP_200_OK)
+@router.get("/{image_id}", response_model=ImageModel, status_code=status.HTTP_200_OK) #ImageModel PhotoModels , 
 async def get_image(image_id: int,
                     current_user: User = Depends(auth_service.get_current_user),
                     db: AsyncSession = Depends(get_db)):
@@ -76,7 +77,7 @@ async def get_image(image_id: int,
 
     :param image_id: int: The id of the image to return
     :param current_user: User: The user object
-    :param db: Session: A connection to our Postgres SQL database.
+    :param db: AsyncSession: A connection to our Postgres SQL database.
     :return: A image object
     """
     image = await repository_pictures.get_image(image_id, current_user, db)
@@ -85,7 +86,7 @@ async def get_image(image_id: int,
     return image
 
 
-@router.delete("/{image_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{image_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(is_admin)]) 
 async def remove_image(image_id: int,
                        current_user: User = Depends(auth_service.get_current_user),
                        db: AsyncSession = Depends(get_db)):
@@ -94,7 +95,7 @@ async def remove_image(image_id: int,
 
     :param image_id: int: The id of the image to delete
     :param current_user: User: The user object
-    :param db: Session: A connection to our Postgres SQL database.
+    :param db: AsyncSession: A connection to our Postgres SQL database.
     :return: A image object
     """
     image = await repository_pictures.remove(image_id, current_user, db)
@@ -114,7 +115,7 @@ async def image_editor(image_id: int,
     :param image_id: int: The id of the image to edit
     :param body: EditImageModel: The body of the request
     :param current_user: User: The user object
-    :param db: Session: A connection to our Postgres SQL database.
+    :param db: AsyncSession: A connection to our Postgres SQL database.
     :return: A image object
     """
     image = await repository_pictures.image_editor(image_id, body, current_user, db)
@@ -134,7 +135,7 @@ async def edit_description(image_id: int,
     :param image_id: int: The id of the image to edit
     :param description: str: The description of the image
     :param current_user: User: The user object
-    :param db: Session: A connection to our Postgres SQL database.
+    :param db: AsyncSession: A connection to our Postgres SQL database.
     :return: A image object
     """
     image = await repository_pictures.edit_description(image_id, description, current_user, db)
@@ -152,7 +153,7 @@ async def generate_qr_code(image_id: int,
 
     :param image_id: int: The id of the image to generate a QR code for
     :param current_user: User: The user object
-    :param db: Session: A connection to our Postgres SQL database.
+    :param db: AsyncSession: A connection to our Postgres SQL database.
     :return: A image object
     """
     image = await repository_pictures.qr_code_generator(image_id, current_user, db)

@@ -1,7 +1,10 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
+
+class ImageTagModel(BaseModel):
+    tag: str
 
 class ImageCircleModel(BaseModel):
     use_filter: bool = False
@@ -48,10 +51,20 @@ class ImageModel(ImageBase):
     created_at: datetime
     updated_at: Optional[datetime]
     user_id: int
-
+    tags: List[str]
+    
     class Config:
         from_attributes = True
 
+class ImageModellist(ImageBase):
+    id: int
+    created_at: datetime
+    updated_at: Optional[datetime]
+    user_id: int
+
+    
+    class Config:
+        from_attributes = True
 
 class ImageResponseCreated(ImageModel):
     detail: str = "Image successfully created"

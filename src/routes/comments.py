@@ -159,8 +159,9 @@ async def show_photo_comments(
     :raises HTTPException 404: If the photo does not exist.
     """
     comments = await repository_comments.get_photo_comments(limit, offset, photo_id, current_user, db)
-
-    return comments#{"comments": comments}
+    if comments:
+        return comments
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
 @router.get("/users/{users_id}", response_model=List[CommentSchema])
@@ -193,4 +194,6 @@ async def show_user_comments(
     :raises HTTPException 404: If the user does not exist.
     """
     comments = await repository_comments.get_user_comments(limit, offset, user_id, db)
-    return comments
+    if comments:
+        return comments
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
