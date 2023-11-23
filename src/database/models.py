@@ -2,8 +2,8 @@ import enum
 
 from datetime import datetime, date
 
-from sqlalchemy import Column, Integer, Text, String, Boolean, func, Table
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy import Column, Integer, Text, String, Boolean, func
+from sqlalchemy.orm import relationship 
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
 from .db import Base
@@ -23,6 +23,8 @@ class TagsImages(Base):
     id = Column(Integer, primary_key=True)
     image_id = Column('image_id', Integer, ForeignKey('images.id', ondelete="CASCADE"))
     tag_id = Column('tag_id', Integer, ForeignKey('tags.id', ondelete="CASCADE"))
+    
+
 
 class Image(Base):
     __tablename__ = "images"

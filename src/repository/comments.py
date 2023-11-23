@@ -39,7 +39,10 @@ async def get_comment(id: int, db: AsyncSession):
     :rtype: Comment | None
     """
     comment = await db.get(Comment, id)
-    return comment
+    if comment:
+        return comment
+    else:
+        return None
 
 
 async def update_comment(text: str, id: int, db: AsyncSession):

@@ -74,7 +74,6 @@ class Auth:
 
     # define a function to generate a new refresh token
     async def create_refresh_token(self, data: dict, expires_delta: Optional[float] = None):
-        print("crate_ref_tok")
         """
         Create a refresh token for a user.
 
@@ -108,7 +107,7 @@ class Auth:
         try:
             payload = jwt.decode(
                 refresh_token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
-            print(payload)
+
             if payload['scope'] == 'refresh_token':
                 email = payload['sub']
                 return email
@@ -183,8 +182,7 @@ class Auth:
                                  algorithms=[self.ALGORITHM])
             email = payload["sub"]
             return email
-        except JWTError as e:
-            print(e)
+        except JWTError:
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                                 detail="Invalid token for email verification")
 

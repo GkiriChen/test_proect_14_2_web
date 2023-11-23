@@ -44,7 +44,7 @@ async def signup(body: UserModel, background_tasks: BackgroundTasks, request: Re
 
 @router.post("/login", response_model=TokenModel)
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
-    print("login")
+
     """
     Authenticate a user and issue access tokens.
 
@@ -95,7 +95,6 @@ async def logout(token: str = Depends(auth_service.oauth2_scheme)):
 
 @router.get('/refresh_token', response_model=TokenModel)
 async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security), db: AsyncSession = Depends(get_db)):
-    print('refresh_token')
     """
     Refresh the access token using the refresh token.
 
