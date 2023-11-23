@@ -1,3 +1,5 @@
+from src.repository.comments import get_comment, update_comment, delete_comment
+from src.database.models import Comment
 import unittest
 from unittest.mock import AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,22 +8,21 @@ import os
 
 sys.path.append(os.path.dirname((os.path.dirname(os.path.abspath(__file__)))))
 
-from src.database.models import Comment
-from src.repository.comments import get_comment, update_comment, delete_comment
-
 
 class TestAsyncMethod(unittest.IsolatedAsyncioTestCase):
-    def setUp(self) -> None:
+    async def asyncSetUp(self) -> None:
+        """Set up an AsyncMock for the database session."""
         self.session = AsyncMock(spec=AsyncSession())
 
-    def test_TearDown(self) -> None:
+    async def asyncTearDown(self) -> None:
+        """Tear down the AsyncMock for the database session."""
         del self.session
 
     async def test_get_comment(self):
+        """Test the get_comment method."""
         comment_id = 1
         comment_text = 'This is a test comment'
-        mock_comment = Comment(
-            id=comment_id, text=comment_text)
+        mock_comment = Comment(id=comment_id, text=comment_text)
         self.session.get.return_value = mock_comment
 
         result = await get_comment(comment_id, self.session)
@@ -30,6 +31,7 @@ class TestAsyncMethod(unittest.IsolatedAsyncioTestCase):
         self.session.get.assert_called_once_with(Comment, comment_id)
 
     async def test_update_comment(self):
+        """Test the update_comment method."""
         comment_id = 1
         new_comment_text = 'Update comment text'
         mock_comment = Comment(
@@ -45,6 +47,7 @@ class TestAsyncMethod(unittest.IsolatedAsyncioTestCase):
         self.session.refresh.assert_called_once_with(mock_comment)
 
     async def test_delete_comment(self):
+        """Test the delete_comment method."""
         comment_id = 1
         mock_comment = Comment(id=comment_id, text='Test comment')
         self.session.get.return_value = mock_comment
