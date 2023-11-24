@@ -80,6 +80,7 @@ class CommentSchema(BaseModel):
     :param photo_id: The ID of the photo to which the comment is associated.
     :type photo_id: int
     """
+    id: int
     text: str = "some text"
     photo_id: int
 

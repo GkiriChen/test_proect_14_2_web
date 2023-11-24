@@ -32,9 +32,13 @@ async def signup(body: UserModel, background_tasks: BackgroundTasks, request: Re
     :rtype: UserResponse
     """
     exist_user = await repository_users.get_user_by_email(body.email, db)
+    exist_user_name = await repository_users.get_user_by_username(body.username, db)
     if exist_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
-                            detail="Account already exists")
+                            detail="An account for this email already exists")
+    if exist_user_name:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                            detail="An account with this username already exists")
     body.password = auth_service.get_password_hash(body.password)
     new_user = await repository_users.create_user(body, db)
     background_tasks.add_task(

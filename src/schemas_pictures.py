@@ -96,7 +96,7 @@ class ImageBase(BaseModel):
     """
     image_url: str = Field(max_length=500)
     description: Optional[str] = Field(max_length=500)
-
+    qr_code_url: Optional[str]
 
 class ImageModel(ImageBase):
     """
@@ -118,6 +118,7 @@ class ImageModel(ImageBase):
         from_attributes = True
 
 
+
 class ImageModellist(ImageBase):
     """
     The **ImageModellist** class defines the structure for representing a simplified image without additional metadata.
@@ -136,36 +137,44 @@ class ImageModellist(ImageBase):
         from_attributes = True
 
 
-class ImageResponseCreated(ImageModel):
+class ImageResponseCreated(ImageModelCreate):
+
     """
     The **ImageResponseCreated** class defines the structure for representing a response when an image is successfully created.
     
     :param detail: str: The detail message indicating the success of the creation.
     """
+
     detail: str = "Image successfully created"
 
     class Config:
         from_attributes = True
 
 
-class ImageResponseUpdated(ImageModel):
+
+class ImageResponseUpdated(ImageModelCreate):
+
     """
     The **ImageResponseUpdated** class defines the structure for representing a response when an image's description is successfully updated.
     
     :param detail: str: The detail message indicating the success of the update.
     """
+
     detail: str = "Image description successfully updated"
 
     class Config:
         from_attributes = True
 
 
-class ImageResponseEdited(ImageModel):
+
+class ImageResponseEdited(ImageModelCreate):
+
     """
     The **ImageResponseEdited** class defines the structure for representing a response when an image is successfully edited.
     
     :param detail: str: The detail message indicating the success of the edit.
     """
+
     detail: str = "Image successfully edited"
 
     class Config:

@@ -7,7 +7,7 @@ import qrcode
 from src.database.db import get_db
 from src.database.models import User
 from src.schemas_pictures import ImageModel, ImageResponseCreated, ImageResponseEdited, ImageResponseUpdated, ImageModellist
-from src.schemas_pictures import EditImageModel
+from src.schemas_pictures import EditImageModel, ImageModelCreate
 from src.services.auth import auth_service
 from src.repository import pictures as repository_pictures
 from src.services.cloud_image import CloudImage
@@ -67,6 +67,23 @@ async def get_images(limit: int = Query(10, le=50), offset: int = 0,
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
     return images
 
+@router.get("/me", response_model=List[ImageModellist], status_code=status.HTTP_200_OK) #
+async def get_images_me(limit: int = Query(10, le=50), offset: int = 0,
+                     current_user: User = Depends(auth_service.get_current_user),
+                     db: AsyncSession = Depends(get_db)):
+    """
+    The **get_images** function gets all the images from the database.
+
+    :param limit: int: The number of images to return
+    :param offset: int: The number of images to skip
+    :param current_user: User: The user object
+    :param db: AsyncSession: A connection to our Postgres SQL database.
+    :return: A list of image objects
+    """
+    images = await repository_pictures.get_images_me(limit, offset, current_user, db)
+    if images is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
+    return images
 
 @router.get("/{image_id}", response_model=ImageModel, status_code=status.HTTP_200_OK) #ImageModel PhotoModels , 
 async def get_image(image_id: int,
@@ -86,7 +103,7 @@ async def get_image(image_id: int,
     return image
 
 
-@router.delete("/{image_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(is_admin)]) 
+@router.delete("/{image_id}", status_code=status.HTTP_200_OK) 
 async def remove_image(image_id: int,
                        current_user: User = Depends(auth_service.get_current_user),
                        db: AsyncSession = Depends(get_db)):
@@ -98,11 +115,19 @@ async def remove_image(image_id: int,
     :param db: AsyncSession: A connection to our Postgres SQL database.
     :return: A image object
     """
+    details = f'delete photo id={image_id}'
+    if current_user.role_id in [2]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="You don't have permission to delete this comment.")
+    elif current_user.role_id in [1]:
+        image = await repository_pictures.remove_admin(image_id,db)
+        if image is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
+        return details
     image = await repository_pictures.remove(image_id, current_user, db)
     if image is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
-    return image
-
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found or You don't have permission to delete this comment.")
+    return details
 
 @router.patch("/image_editor", response_model=ImageResponseEdited, status_code=status.HTTP_201_CREATED)
 async def image_editor(image_id: int,

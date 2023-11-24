@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import aliased
@@ -77,6 +79,7 @@ async def get_images(limit: int, offset: int, user: User, db: AsyncSession):
     :param offset: int: The number of images to skip.
     :param user: User: The user object.
     :param db: AsyncSession: A connection to our Postgres SQL database.
+
     :return: list: A list of image objects.
     """
     result = await db.execute(select(Image, Tag).filter(Image.user_id == user.id)
@@ -89,6 +92,30 @@ async def get_images(limit: int, offset: int, user: User, db: AsyncSession):
         return im_dick
     else:
         return None
+    
+async def get_images_me(limit: int, offset: int, user: User, db: AsyncSession):
+    '''
+    The **get_images** function gets all the images from the database.
+    
+    :param limit: int: The number of images to return
+    :param offset: int: The number of images to skip
+    :param user: User: The user object
+    :param db: AsyncSession: A connection to our Postgres SQL database.
+    :return: A list of image objects
+    '''
+   
+    
+    result = await db.execute(select(Image).filter(Image.user_id == user.id)
+                              .order_by(Image.created_at.desc()).limit(limit).offset(offset))
+    images = result.fetchall()
+    if images:
+        im_dick = []
+        for o in images:
+            im_dick.append(o[0])
+        return im_dick
+    else:
+        return None
+
 
 
 async def get_image(image_id: int, user: User, db: AsyncSession):
@@ -107,6 +134,7 @@ async def get_image(image_id: int, user: User, db: AsyncSession):
     psql2 = await db.execute(
         select(
             images_alias.image_url,
+            images_alias.qr_code_url,
             images_alias.description,
             images_alias.id,
             images_alias.created_at,
@@ -116,7 +144,7 @@ async def get_image(image_id: int, user: User, db: AsyncSession):
         )
         .join(tags_images_alias, images_alias.id == tags_images_alias.image_id)
         .join(tags_alias, tags_images_alias.tag_id == tags_alias.id)
-        .filter(images_alias.id == image_id, images_alias.user_id == user.id)
+        .filter(images_alias.id == image_id)
         .group_by(images_alias.description, images_alias.id, images_alias.user_id)
     )
 
@@ -135,11 +163,13 @@ async def get_image_from_id(image_id: int, user: User, db: AsyncSession):
     :param image_id: int: The ID of the image to retrieve.
     :param user: User: The user object.
     :param db: AsyncSession: A connection to our Postgres SQL database.
+
     :return: Image: The image object.
     """
     psql = await db.execute(select(Image).filter(Image.id == image_id, Image.user_id == user.id))
     image = psql.fetchone()
     return image[0]
+
 
 
 async def get_image_from_url(image_url: str, user: User, db: AsyncSession):
@@ -175,6 +205,22 @@ async def remove(image_id: int, user: User, db: AsyncSession):
     else:
         return None
 
+async def remove_admin(id: int, db: AsyncSession):
+    '''
+    The **remove** function deletes a single image from the database.
+        
+    :param image_id: int: The id of the image to delete
+    :param user: User: The user object
+    :param db: AsyncSession: A connection to our Postgres SQL database.
+    :return: A image object
+    '''
+    image = await db.get(Image, id)
+    if image:
+        await db.delete(image)
+        await db.commit()
+        return image
+    else:
+        return None
 
 async def image_editor(image_id: int, body: EditImageModel, user: User, db: AsyncSession):
     """
@@ -225,9 +271,12 @@ async def image_editor(image_id: int, body: EditImageModel, user: User, db: Asyn
             [edit_data.append(elem) for elem in trans_list]
         if edit_data:
             CloudImage()
+
             new_image = CloudinaryImage(image.public_id).image(
                 transformation=edit_data)
+            new_image = new_image[10:-3]
             image.image_url = new_image
+            image.updated_at = datetime.now()
             await db.commit()
             await db.refresh(image)
             return image
@@ -277,6 +326,7 @@ async def qr_code_generator(image_id: int, user: User, db: AsyncSession):
         file = f'./src/services/qrcodes/{image_id}.png'
         CloudImage.upload(file, public_id, overwrite=False)
         image_url = CloudImage.get_url_for_image(public_id)
+
 
         # f'./src/services/qrcodes/{image_id}.png'
         image.qr_code_url = image_url
