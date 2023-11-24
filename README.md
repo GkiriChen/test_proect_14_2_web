@@ -23,3 +23,12 @@
 10. Також в терміналі запустити серевер командою ```uvicorn main:app --reload``` або ```uvicorn main:app --host localhost --port 8000 --reload```
 11. Відкрити сторінку в браузері за посиланням з термінала.
  
+## Розробники
+<div align="">
+  Developer: <a href="https://github.com/qquinyri1">Nikita Pavlov</a><br>
+  Developer: <a href="https://github.com/Vasyl-Hlushchenko">Vasyl-Hlushchenko</a><br>
+  Developer: <a href="https://github.com/Jakson992">Jaka Petrenko</a><br>
+  Developer: <a href="https://github.com/OlegDovhyi">Oleg Dovhyi</a><br>
+  Scrum Muster/Developer: <a href="https://github.com/UstymenkoOB">Oksana Ustymenko</a><br>
+  Team Lead/Developer: <a href="https://github.com/GkiriChen">Gennadiy Kiricheko</a><br>
+</div>
