@@ -44,7 +44,7 @@ class EditImageModel(BaseModel):
 class ImageBase(BaseModel):
     image_url: str = Field(max_length=500)
     description: Optional[str] = Field(max_length=500)
-
+    qr_code_url: Optional[str]
 
 class ImageModel(ImageBase):
     id: int
@@ -56,6 +56,16 @@ class ImageModel(ImageBase):
     class Config:
         from_attributes = True
 
+class ImageModelCreate(ImageBase):
+    id: int
+    created_at: datetime
+    updated_at: Optional[datetime]
+    user_id: int
+    
+    class Config:
+        from_attributes = True
+
+
 class ImageModellist(ImageBase):
     id: int
     created_at: datetime
@@ -66,21 +76,21 @@ class ImageModellist(ImageBase):
     class Config:
         from_attributes = True
 
-class ImageResponseCreated(ImageModel):
+class ImageResponseCreated(ImageModelCreate):
     detail: str = "Image successfully created"
 
     class Config:
         from_attributes = True
 
 
-class ImageResponseUpdated(ImageModel):
+class ImageResponseUpdated(ImageModelCreate):
     detail: str = "Image description successfully updated"
 
     class Config:
         from_attributes = True
 
 
-class ImageResponseEdited(ImageModel):
+class ImageResponseEdited(ImageModelCreate):
     detail: str = "Image successfully edited"
 
     class Config:

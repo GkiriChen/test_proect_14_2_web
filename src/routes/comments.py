@@ -93,7 +93,7 @@ async def change_comment(
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
-@router.delete("/delete", response_model=CommentRemoveSchema)
+@router.delete("/delete", status_code=status.HTTP_200_OK)
 async def remove_comment(
         comment_id: int = Form(...),
 

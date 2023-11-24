@@ -40,6 +40,7 @@ class CommentSchema(BaseModel):
     """
     Schema for creating a comment.
     """
+    id: int
     text: str = "some text"
     photo_id: int
 
