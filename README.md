@@ -8,8 +8,8 @@
 </p>
 
 ## Deployment
-- [Live PhotoShare] (https://photoshare-team6.fly.dev/docs)
-- 
+- [Live PhotoShare](https://photoshare-team6.fly.dev/docs)
+
 ## Installation 💻
 To run this project, follow these steps:
 
