@@ -8,22 +8,6 @@ primary_region = "waw"
 
 [build]
 
-[env]
-  ALGORITHM = "HS256"
-  CLOUDINARY_API_KEY = "335625953666828"
-  CLOUDINARY_API_SECRET = "MBR6lfl8BRujgob8868ef8hpXP0"
-  CLOUDINARY_NAME = "dqmlojrsc"
-  MAIL_FROM = "pythonweb14@meta.ua"
-  MAIL_PASSWORD = "PythonWeb14"
-  MAIL_PORT = "465"
-  MAIL_SERVER = "smtp.meta.ua"
-  MAIL_USERNAME = "pythonweb14@meta.ua"
-  POSTGRES_DB = "hxtyzqkm"
-  POSTGRES_PASSWORD = "N5_lWtjLWL0tnHB2z0awAktcta6pcuIH"
-  POSTGRES_URL = "postgresql+asyncpg://hxtyzqkm:N5_lWtjLWL0tnHB2z0awAktcta6pcuIH@trumpet.db.elephantsql.com/hxtyzqkm"
-  POSTGRES_USER = "hxtyzqkm"
-  SECRET_KEY = "secret_key"
-
 [http_service]
   internal_port = 8080
   force_https = true

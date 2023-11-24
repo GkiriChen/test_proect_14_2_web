@@ -16,8 +16,8 @@ class Settings(BaseSettings):
     mail_from: str
     mail_port: int
     mail_server: str
-    # redis_host: str
-    # redis_port: int
+    redis_host: str
+    redis_port: int
 
     class Config:
         env_file = ".env"
@@ -25,7 +25,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
-from dotenv import load_dotenv
-
-load_dotenv()

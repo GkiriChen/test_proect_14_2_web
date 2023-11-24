@@ -1,5 +1,4 @@
-from datetime import datetime, date
-
+from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.database.models import Comment
@@ -85,16 +84,15 @@ async def delete_comment(id: int, db: AsyncSession):
     :rtype: Comment
     """
     comment = await db.get(Comment, id)
-  
+
     if comment:
         try:
             await db.delete(comment)
-            await db.commit()         
+            await db.commit()
             return comment
         except Exception as e:
             await db.rollback()
-            raise e       
-
+            raise e
     return None
 
 
@@ -108,7 +106,7 @@ async def get_photo_comments(offset: int, limit: int, photo_id: int, user: int, 
     :param db: AsyncSession: The database session for performing operations.
     :return: list[Comment]: Pagination-aware list of comments on the photo.
     """
-    sql = await db.execute(select(Comment).filter(Comment.photo_id == photo_id, Comment.user_id == user.id).offset(offset).limit(limit))   
+    sql = await db.execute(select(Comment).filter(Comment.photo_id == photo_id, Comment.user_id == user.id).offset(offset).limit(limit))
     result = sql.fetchall()
     if result:
         comments = []
@@ -135,9 +133,9 @@ async def get_user_comments(offset: int, limit: int, user_id: int, db: AsyncSess
     :rtype: list[Comment]
     """
     sql = await db.execute(select(Comment)
-           .filter(Comment.user_id == user_id)
-           .offset(offset)
-           .limit(limit))
+                           .filter(Comment.user_id == user_id)
+                           .offset(offset)
+                           .limit(limit))
     result = sql.fetchall()
     if result:
         comments = []

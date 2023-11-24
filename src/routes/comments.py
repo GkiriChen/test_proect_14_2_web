@@ -1,32 +1,26 @@
 from typing import List
+from fastapi import APIRouter, Depends, status, HTTPException, Form
+from sqlalchemy.ext.asyncio import AsyncSession
 
 import src.repository.comments as repository_comments
 from src.database.db import get_db
-from fastapi import APIRouter, Depends, status, HTTPException, Form
-
-from src.services.auth import auth_service
-
 from src.database.models import User
-from sqlalchemy.ext.asyncio import AsyncSession
-from src.schemas import CommentSchema, CommentList, CommentUpdateSchems, CommentRemoveSchema
+from src.services.auth import auth_service
+from src.schemas import CommentSchema, CommentUpdateSchems, CommentRemoveSchema
 
-THE_MANY_REQUESTS = "No more than 10 requests in minute"
-DELETED_SUCCESSFUL = "You deleted SUCCESSFUL"
+THE_MANY_REQUESTS = "No more than 10 requests in a minute"
+DELETED_SUCCESSFUL = "Comment deleted successfully"
 
 router = APIRouter(prefix="/comments", tags=['Comments'])
 
 
 @router.post("/publish", status_code=status.HTTP_201_CREATED,
              description=THE_MANY_REQUESTS,
-             # dependencies=[Depends(Ratelimiter(times=10, seconds=60))],
-             response_model=CommentSchema
-             )
+             response_model=CommentSchema)
 async def post_comment(
         photo_id: int = Form(...),
         text: str = Form(...),
-
         current_user: User = Depends(auth_service.get_current_user),
-
         db: AsyncSession = Depends(get_db),
 ):
     """
@@ -56,14 +50,11 @@ async def post_comment(
 
 @router.patch(
     "/update",
-    status_code=status.HTTP_200_OK, response_model=CommentUpdateSchems
-)
+    status_code=status.HTTP_200_OK, response_model=CommentUpdateSchems)
 async def change_comment(
         comment_id: int = Form(...),
         text: str = Form(...),
-
         current_user: User = Depends(auth_service.get_current_user),
-
         db: AsyncSession = Depends(get_db),
 ):
     """
@@ -96,9 +87,7 @@ async def change_comment(
 @router.delete("/delete", status_code=status.HTTP_200_OK)
 async def remove_comment(
         comment_id: int = Form(...),
-
         current_user: User = Depends(auth_service.get_current_user),
-
         db: AsyncSession = Depends(get_db),
 ):
     """
@@ -134,9 +123,7 @@ async def show_photo_comments(
         photo_id: int,
         limit: int = 0,
         offset: int = 10,
-
         current_user: User = Depends(auth_service.get_current_user),
-
         db: AsyncSession = Depends(get_db),
 ):
     """
@@ -169,9 +156,7 @@ async def show_user_comments(
         user_id: int,
         limit: int = 0,
         offset: int = 10,
-
         current_user: User = Depends(auth_service.get_current_user),
-
         db: AsyncSession = Depends(get_db),
 ):
     """
