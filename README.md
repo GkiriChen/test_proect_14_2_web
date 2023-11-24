@@ -1,4 +1,4 @@
-# Project "PhotoShare"
+# Проект "PhotoShare"
 <p align="center">
    <img src="https://img.shields.io/badge/Language-Python-9cf">
    <img src="https://img.shields.io/badge/FastAPI-0.95.1-brightgreen">
@@ -7,13 +7,19 @@
    <img src="https://img.shields.io/badge/License-MIT-yellow">
 </p>
 
-## Deployment
+## Розгорнут
 - [Live PhotoShare](https://photoshare-team6.fly.dev/docs)
 
-## Installation 💻
-To run this project, follow these steps:
+## Установка 💻
 
-1. Clone this repository to your local machine;
-2. Install the required packages by running ```pip install -r requirements.txt```
-3. Set the required environment variables;
-4. Start the server by running ```uvicorn main:app --reload```
+1. Для розгортання додатку локально на комп'ютері потрібно створити базу даних ```Postges```
+2. Встановити пакет віртуального оточення ```poetry```
+3. Створити ```".env"``` файл на основі ```"example.env"```
+5. Встановити ```Docker(desktop)```
+6. Запустити середовище розробки
+7. Встановіть необхідні пакети, запустивши ```pip install -r requirements.txt```
+8. В терміналі виконати команду ```alembic upgrade heads```
+9. В терміналі виконати команду ```docker-compose up```
+10. Також в терміналі запустити серевер командою ```uvicorn main:app --reload``` або ```uvicorn main:app --host localhost --port 8000 --reload```
+11. Відкрити сторінку в браузері за посиланням з термінала.
+ 
